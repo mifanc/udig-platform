@@ -225,6 +225,24 @@
             %search.description
          </description>
       </view>
+      <view
+            allowMultiple="true"
+            category="catalog"
+            class="net.refractions.udig.catalog.ui.browse.ServiceView"
+            icon="icons/eview16/catalog_view.gif"
+            id="net.refractions.udig.catalog.ui.browse.Service"
+            name="Service"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="true"
+            category="catalog"
+            class="net.refractions.udig.catalog.ui.browse.ServiceTypeView"
+            icon="icons/eview16/catalog_view.gif"
+            id="net.refractions.udig.catalog.ui.browse.ServiceTypeView"
+            name="Service Type"
+            restorable="true">
+      </view>
    </extension>
    <extension
          name="catalogPerspectiveContributions"
