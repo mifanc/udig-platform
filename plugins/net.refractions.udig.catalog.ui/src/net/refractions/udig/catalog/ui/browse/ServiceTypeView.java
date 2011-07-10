@@ -1,3 +1,20 @@
+/*
+ *    uDig - User Friendly Desktop Internet GIS client
+ *    http://udig.refractions.net
+ *    (C) 2004, Refractions Research Inc.
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
+ */
+
 package net.refractions.udig.catalog.ui.browse;
 
 import java.io.IOException;
@@ -44,6 +61,23 @@ import org.osgi.service.prefs.BackingStoreException;
 
 
 
+/**
+ * View for Service Type - the first level in the catalog browse view. 
+ * <p>
+ * The catalog browse view will consist of the following views
+ * <ul>
+ * <li>Service Type</li>
+ * <li>Service</li>
+ * <li>Data Type | Feature Type</li>
+ * <li>Layers</li>
+ * </ul>
+ * </p>
+ * @author  Mifan Careem     mifanc@gmail.com
+ * @since   1.2.0
+ * @todo    Implement IAdaptable
+ * @todo    ISelectionListener
+ * @todo    Currently borrows from CatalogView - change to be unique
+ */
 public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, IDropTargetProvider{
     public static final String VIEW_ID = "net.refractions.udig.catalog.ui.browse.ServiceTypeView"; //$NON-NLS-1$
 
@@ -60,36 +94,24 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
         // TODO Auto-generated constructor stub
     }
 
+    /**
+     *hookGlobalActions()- implement global properties and delete actions - not needed at this level
+     */
     public void createPartControl( Composite parent ) {
-        // create viewer
-//        treeviewer = new CatalogTreeViewer(parent, false);
         treeviewer = new CatalogTreeViewer(parent, true);
         treeviewer.setMessageBoard(new StatusLineMessageBoardAdapter(getViewSite().getActionBars().getStatusLineManager()));
 
         UDIGDragDropUtilities.addDragDropSupport(treeviewer, this);
 
         getSite().setSelectionProvider(treeviewer);
-        // Create menu and toolbars
-        createActions();
-        createMenu();
-        createToolbar();
-        createContextMenu();
-        hookGlobalActions();
-
-        // restore state (from previous session)
-
+        
+        // Create menu and toolbars - identify what is required
+        //createActions();
+        //createMenu();
+        //createToolbar();
+        //createContextMenu();
     }
 
-    /**
-     * We need to hook up to a few global actions such as Properties and Delete.
-     * <ul>
-     * <li>
-     */
-    protected void hookGlobalActions(){
-        getViewSite().getActionBars().setGlobalActionHandler(
-                IWorkbenchActionConstants.PROPERTIES,
-                propertiesAction );
-    }
     
     private void createContextMenu() {
         final MenuManager contextMenu = new MenuManager();
@@ -100,14 +122,14 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
             public void menuAboutToShow( IMenuManager mgr ) {
                 contextMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
                 contextMenu.add(new Separator());
-                contextMenu.add(removeAction);
+                //contextMenu.add(removeAction);
                 IWorkbenchWindow window = getSite().getWorkbenchWindow();
-                IAction action = ActionFactory.IMPORT.create(window);
-                contextMenu.add(action);
-                contextMenu.add(new Separator());
+                //IAction action = ActionFactory.IMPORT.create(window);
+                //contextMenu.add(action);
+                //contextMenu.add(new Separator());
                 contextMenu.add(UiPlugin.getDefault().getOperationMenuFactory().getContextMenu(treeviewer.getSelection()));
                 contextMenu.add(new Separator());
-                contextMenu.add(ActionFactory.EXPORT.create(getSite().getWorkbenchWindow()));
+                //contextMenu.add(ActionFactory.EXPORT.create(getSite().getWorkbenchWindow()));
             }
 
         });
@@ -129,11 +151,14 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
      * </p>
      */
     private void createActions() {
+        
         propertiesAction  =
             new PropertyDialogAction( getViewSite().getWorkbenchWindow(), treeviewer );
                    
         getViewSite().getActionBars().setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), propertiesAction);        
         getSite().getKeyBindingService().registerAction(propertiesAction);
+        
+        /*
         
         removeAction = new Action(){
             public void run() {
@@ -151,7 +176,7 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
         
         PlatformUI.getWorkbench().getHelpSystem().setHelp(removeAction,
                 IHelpContextIds.REMOVE_SERVICE_ACTION);
-
+        
         saveAction = new Action(Messages.CatalogView_save_label){ 
             public void run() {
                 try {
@@ -173,6 +198,7 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
                 }
             }
         };
+        */
 
         // Add selection listener.
         treeviewer.addSelectionChangedListener(new ISelectionChangedListener(){
@@ -266,8 +292,8 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
      */
     private void createMenu() {
         IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
-        mgr.add(saveAction);
-        mgr.add(loadAction);
+        //mgr.add(saveAction);
+        //mgr.add(loadAction);
     }
 
     /**
@@ -278,28 +304,16 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
         // mgr.add(addAction);
 
         IWorkbenchWindow window = getSite().getWorkbenchWindow();
+        /*
         IAction action = ActionFactory.IMPORT.create(window);
 
         action.setImageDescriptor(CatalogUIPlugin.getDefault()
                 .getImageDescriptor(ImageConstants.PATH_ETOOL + "import_wiz.gif")); //$NON-NLS-1$
         mgr.add(action);
-
-        mgr.add(removeAction);
+        */
     }
 
-    /**
-     * Asks this view take focus within the workbench.
-     * <p>
-     * From IWorkbenchPart: Clients should not call this method (the workbench calls this method at
-     * appropriate times). To have the workbench activate a part, use
-     * <code>IWorkbenchPage.activate(IWorkbenchPart) instead</code>.
-     * </p>
-     * <p>
-     * Used to set the focus to the appropriate control, for us that is the treeviewer. But if we
-     * were smart we could send the user off to a search field or something they actually need (like
-     * a broken datastore) based on context.
-     * </p>
-     */
+    
     public void setFocus() {
         treeviewer.getControl().setFocus();
     }

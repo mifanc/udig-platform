@@ -1,6 +1,20 @@
-/**
- * 
+/*
+ *    uDig - User Friendly Desktop Internet GIS client
+ *    http://udig.refractions.net
+ *    (C) 2004, Refractions Research Inc.
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
  */
+
 package net.refractions.udig.catalog.ui.browse;
 
 import org.eclipse.swt.widgets.Composite;
@@ -32,6 +46,43 @@ import org.eclipse.ui.PartInitException;
 import org.opengis.feature.Feature;
 import org.opengis.filter.Filter;
 
+import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IService;
+import net.refractions.udig.catalog.ui.CatalogTreeViewer;
+import net.refractions.udig.catalog.ui.CatalogUIPlugin;
+import net.refractions.udig.catalog.ui.StatusLineMessageBoardAdapter;
+import net.refractions.udig.catalog.ui.internal.Messages;
+import net.refractions.udig.internal.ui.IDropTargetProvider;
+import net.refractions.udig.internal.ui.UiPlugin;
+import net.refractions.udig.ui.ProgressManager;
+import net.refractions.udig.ui.UDIGDragDropUtilities;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.dialogs.PropertyDialogAction;
+import org.eclipse.ui.part.ISetSelectionTarget;
+import org.eclipse.ui.part.ViewPart;
+import org.osgi.service.prefs.BackingStoreException;
+
+
 /**
  * ServiceView implements the Service browse component of the Catalog Browsing Perspective 
  * <p>
@@ -39,9 +90,11 @@ import org.opengis.filter.Filter;
  * <li></li>
  * </ul>
  * </p>
+ * @author Mifan Careem     mifanc
+ * @since 1.2.0
  */
 //@todo implements  ISelectionListener
-public class ServiceView extends ViewPart {
+public class ServiceView extends ViewPart{
 
     /** <code>VIEW_ID</code> field */
     public static final String VIEW_ID = "net.refractions.udig.catalog.ui.browse.ServiceView"; //$NON-NLS-1$
@@ -60,6 +113,16 @@ public class ServiceView extends ViewPart {
     private Text text;
     private ISelectionListener selectionListener;
     private Text description;
+    
+    CatalogTreeViewer treeviewer;
+
+    Action removeAction; // addAction
+
+    private Action saveAction;
+    private Action loadAction;
+
+    private Action propertiesAction;
+
 
     /**
      * 
