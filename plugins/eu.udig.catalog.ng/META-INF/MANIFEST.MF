@@ -8,6 +8,7 @@ Bundle-Vendor: Mifan Careem
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  net.refractions.udig.catalog;bundle-version="1.2.0",
- net.refractions.udig.project.ui;bundle-version="1.2.0"
+ net.refractions.udig.project.ui;bundle-version="1.2.0",
+ net.refractions.udig.catalog.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
