@@ -17,7 +17,7 @@
 
 package eu.udig.catalog.ng.ui;
 
-import net.refractions.udig.catalog.CatalogServiceTypePlugin;
+//import net.refractions.udig.catalog.CatalogServiceTypePlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IResolve.Status;
 import net.refractions.udig.catalog.ui.CatalogViewerSorter;
@@ -35,6 +35,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
+import eu.udig.catalog.ng.CatalogNGPlugin;
 
 /**
  * Provides Tree view of the Registry Service Types for a unified catalog NG view 
@@ -97,7 +99,8 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         setUseHashlookup(true);
         
         //set filtered input here to show only ServiceTypes etc depending on view
-        setInput(CatalogServiceTypePlugin.getDefault().getLocalCatalog());
+        //setInput(CatalogServiceTypePlugin.getDefault().getLocalCatalog());
+        setInput(CatalogNGPlugin.getDefault().getLocalCatalog());
         
         //set custom sorter instead of CatalogViewerSorter
         setSorter(new CatalogViewerSorter());
