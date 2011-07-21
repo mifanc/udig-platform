@@ -59,6 +59,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -75,9 +76,10 @@ import org.osgi.service.prefs.BackingStoreException;
  * The activator class controls the plug-in life cycle for UI - see how it works with non-UI plugins
  * @author  Mifan Careem     mifanc@gmail.com
  * @since   1.2.0
+ * @todo    Set custom messages
  * 
  */
-public class CatalogNGPlugin extends AbstractUdigUIPlugin {
+public class CatalogNGPlugin extends Plugin {
 
 	// The plug-in ID
 	public static final String ID = "eu.udig.catalog.ng"; //$NON-NLS-1$
@@ -136,6 +138,17 @@ public class CatalogNGPlugin extends AbstractUdigUIPlugin {
         resolveManager = new ResolveManager();
         preferenceStore = new ScopedPreferenceStore(new InstanceScope(), getBundle()
                 .getSymbolicName());
+        
+        try {
+            plugin.restoreFromPreferences();
+            addSaveLocalCatalogShutdownHook();
+        } catch (BackingStoreException e) {
+            CatalogNGPlugin.log(null, e);
+            handlerLoadingError(e);
+        } catch (MalformedURLException e) {
+            CatalogNGPlugin.log(null, e);
+            handlerLoadingError(e);
+        }
 	}
 
 	/*
@@ -143,8 +156,9 @@ public class CatalogNGPlugin extends AbstractUdigUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		plugin = null;
 		super.stop(context);
+    	  plugin = null;
+    	  resourceBundle = null;
 	}
 
 	/**
@@ -155,12 +169,8 @@ public class CatalogNGPlugin extends AbstractUdigUIPlugin {
 	public static CatalogNGPlugin getDefault() {
 		return plugin;
 	}
-
-    @Override
-    public IPath getIconPath() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	
+	
     
     private void addSaveLocalCatalogShutdownHook() {
         ShutdownTaskList.instance().addPreShutdownTask(new PreShutdownTask(){
@@ -174,7 +184,7 @@ public class CatalogNGPlugin extends AbstractUdigUIPlugin {
             }
 
             public boolean handlePreShutdownException( Throwable t, boolean forced ) {
-                CatalogPlugin.log("Error storing local catalog", t); //$NON-NLS-1$
+                CatalogNGPlugin.log("Error storing local catalog", t); //$NON-NLS-1$
                 return true;
             }
 
@@ -235,7 +245,7 @@ public class CatalogNGPlugin extends AbstractUdigUIPlugin {
                     getServiceFactory());
             loadCatalogs();
         } catch (Throwable t) {
-            CatalogPlugin.log(null, new Exception(t));
+            CatalogNGPlugin.log(null, new Exception(t));
         }
     }
     /**
@@ -299,7 +309,7 @@ public class CatalogNGPlugin extends AbstractUdigUIPlugin {
      * Returns the string from the plugin's resource bundle, or 'key' if not found.
      */
     public static String getResourceString( String key ) {
-        ResourceBundle bundle = CatalogPlugin.getDefault().getResourceBundle();
+        ResourceBundle bundle = CatalogNGPlugin.getDefault().getResourceBundle();
         try {
             return (bundle != null) ? bundle.getString(key) : key;
         } catch (MissingResourceException e) {

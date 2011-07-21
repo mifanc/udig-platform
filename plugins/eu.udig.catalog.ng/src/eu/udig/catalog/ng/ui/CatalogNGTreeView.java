@@ -18,6 +18,7 @@
 package eu.udig.catalog.ng.ui;
 
 //import net.refractions.udig.catalog.CatalogServiceTypePlugin;
+import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IResolve.Status;
 import net.refractions.udig.catalog.ui.CatalogViewerSorter;
@@ -100,7 +101,10 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         
         //set filtered input here to show only ServiceTypes etc depending on view
         //setInput(CatalogServiceTypePlugin.getDefault().getLocalCatalog());
+        //Still not working with custom plugin
         setInput(CatalogNGPlugin.getDefault().getLocalCatalog());
+        
+        //setInput(CatalogPlugin.getDefault().getLocalCatalog());
         
         //set custom sorter instead of CatalogViewerSorter
         setSorter(new CatalogViewerSorter());
