@@ -101,10 +101,10 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         
         //set filtered input here to show only ServiceTypes etc depending on view
         //setInput(CatalogServiceTypePlugin.getDefault().getLocalCatalog());
-        //Still not working with custom plugin
-        setInput(CatalogNGPlugin.getDefault().getLocalCatalog());
+        //setInput(CatalogNGPlugin.getDefault().getLocalCatalog());
         
-        //setInput(CatalogPlugin.getDefault().getLocalCatalog());
+        setInput(CatalogPlugin.getDefault().getLocalCatalog());
+        System.out.print(CatalogPlugin.getDefault().getLocalCatalog());
         
         //set custom sorter instead of CatalogViewerSorter
         setSorter(new CatalogViewerSorter());
@@ -113,6 +113,9 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         
     }
     @Override
+    /**
+     * @todo    get selection and pass it along to other views for action
+     */
     public void selectionChanged( SelectionChangedEvent event ) {
         // TODO Auto-generated method stub
         if( messageBoard==null )

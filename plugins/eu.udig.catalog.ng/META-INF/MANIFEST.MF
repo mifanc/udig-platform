@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Catalog Browse Plug-in
 Bundle-SymbolicName: eu.udig.catalog.ng;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: eu.udig.catalog.ng.CatalogNGPlugin
+Bundle-Activator: eu.udig.catalog.ng.CatalogNGUIPlugin
 Bundle-Vendor: Mifan Careem
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
