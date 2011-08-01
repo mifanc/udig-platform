@@ -18,9 +18,12 @@
 package eu.udig.catalog.ng.ui;
 
 //import net.refractions.udig.catalog.CatalogServiceTypePlugin;
+import java.util.Iterator;
+
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IResolve.Status;
+import net.refractions.udig.catalog.internal.CatalogImpl;
 import net.refractions.udig.catalog.ui.CatalogViewerSorter;
 import net.refractions.udig.catalog.ui.IMessageBoard;
 import net.refractions.udig.catalog.ui.ResolveContentProvider;
@@ -38,6 +41,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import eu.udig.catalog.ng.CatalogNGPlugin;
+import eu.udig.catalog.ng.CatalogNGTreeFilter;
 
 /**
  * Provides Tree view of the Registry Service Types for a unified catalog NG view 
@@ -58,7 +62,9 @@ import eu.udig.catalog.ng.CatalogNGPlugin;
  */
 public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedListener{
     
+    private static boolean DEBUG = true;
     private IMessageBoard messageBoard;
+    private CatalogNGTreeFilter treeFilter = new CatalogNGTreeFilter();
 
     /**
      * Construct <code>CatalogNGTreeView</code>.
@@ -103,8 +109,26 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         //setInput(CatalogServiceTypePlugin.getDefault().getLocalCatalog());
         //setInput(CatalogNGPlugin.getDefault().getLocalCatalog());
         
-        setInput(CatalogPlugin.getDefault().getLocalCatalog());
-        System.out.print(CatalogPlugin.getDefault().getLocalCatalog());
+        
+        /**
+         * @todo    call a filter function here that returns a CatalogImpl object with the required filtered tree
+         */
+        //setInput(CatalogPlugin.getDefault().getLocalCatalog());
+        //setInput(CatalogPlugin.getDefault().getLocalCatalog());
+        setInput(treeFilter.getServiceTypes((CatalogImpl)CatalogPlugin.getDefault().getLocalCatalog()));
+        
+        if(DEBUG){
+            CatalogImpl debugCatImpl = (CatalogImpl) CatalogPlugin.getDefault().getLocalCatalog();
+            System.out.print(debugCatImpl);
+            System.out.print("List Count"+debugCatImpl.members(null).size());
+            Iterator itr;
+            itr = debugCatImpl.members(null).iterator();
+            while(itr.hasNext()){
+                System.out.print("ELMNT"+itr.next());
+            }
+        }
+        
+        //System.out.print(CatalogPlugin.getDefault().getLocalCatalog());
         
         //set custom sorter instead of CatalogViewerSorter
         setSorter(new CatalogViewerSorter());
