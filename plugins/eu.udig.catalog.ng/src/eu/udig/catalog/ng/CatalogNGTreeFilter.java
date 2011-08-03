@@ -38,8 +38,9 @@ public class CatalogNGTreeFilter {
         
         itr = serviceList.members(null).iterator();
         while(itr.hasNext()){
-            filteredList.add((IService)itr.next());
+                filteredList.add((IService)itr.next());
         }
+        
      
         return filteredList;
     }

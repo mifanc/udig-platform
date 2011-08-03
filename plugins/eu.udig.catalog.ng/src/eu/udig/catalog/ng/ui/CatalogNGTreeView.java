@@ -80,9 +80,9 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
      * 
      * @param parent
      */
-    public CatalogNGTreeView(Composite parent, boolean titles) {
+    public CatalogNGTreeView(Composite parent, boolean titles, String type) {
         // TODO Auto-generated constructor stub
-        this(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, titles);
+        this(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, titles, type);
     }
     
     /**
@@ -92,7 +92,7 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
      * @param style The other constructor uses SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER
      * @todo    add custom sorter 
      */
-    public CatalogNGTreeView( Composite parent, int style, boolean titles ) {
+    public CatalogNGTreeView( Composite parent, int style, boolean titles, String type ) {
         super(parent, style|SWT.VIRTUAL);
         setContentProvider(new ResolveContentProvider());
         ResolveLabelProviderSimple resolveLabelProviderSimple = new ResolveLabelProviderSimple();
