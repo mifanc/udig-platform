@@ -47,6 +47,7 @@ import org.eclipse.ui.part.ViewPart;
  */
 public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, IDropTargetProvider{
     public static final String VIEW_ID = "eu.udig.catalog.ng.ui.ServiceTypeView"; //$NON-NLS-1$
+    public final String TYPE_ID = "ServiceTypeView"; //$NON-NLS-1$
     
     //setup tree view
     CatalogNGTreeView treeViewer;
@@ -62,7 +63,8 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
     @Override
     public void createPartControl( Composite parent ) {
         // TODO Auto-generated method stub
-        treeViewer = new CatalogNGTreeView(parent, true);
+        //treeViewer = new CatalogNGTreeView(parent, true);
+        treeViewer = new CatalogNGTreeView(parent, TYPE_ID);
         treeViewer.setMessageBoard(new StatusLineMessageBoardAdapter(getViewSite().getActionBars().getStatusLineManager()));
         UDIGDragDropUtilities.addDragDropSupport(treeViewer, this);
         getSite().setSelectionProvider(treeViewer);

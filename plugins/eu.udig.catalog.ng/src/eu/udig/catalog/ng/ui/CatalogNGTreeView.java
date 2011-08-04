@@ -18,12 +18,18 @@
 package eu.udig.catalog.ng.ui;
 
 //import net.refractions.udig.catalog.CatalogServiceTypePlugin;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.ID;
 import net.refractions.udig.catalog.IResolve;
+import net.refractions.udig.catalog.ISearch;
 import net.refractions.udig.catalog.IResolve.Status;
 import net.refractions.udig.catalog.internal.CatalogImpl;
+import net.refractions.udig.catalog.memory.MemoryCatalog;
 import net.refractions.udig.catalog.ui.CatalogViewerSorter;
 import net.refractions.udig.catalog.ui.IMessageBoard;
 import net.refractions.udig.catalog.ui.ResolveContentProvider;
@@ -31,6 +37,7 @@ import net.refractions.udig.catalog.ui.ResolveLabelProviderSimple;
 import net.refractions.udig.catalog.ui.ResolveTitlesDecorator;
 import net.refractions.udig.catalog.ui.internal.Messages;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -39,6 +46,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 import eu.udig.catalog.ng.CatalogNGPlugin;
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
@@ -68,13 +77,17 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
 
     /**
      * Construct <code>CatalogNGTreeView</code>.
+     * default constructor called by Views
      * 
      * @param parent
+     * @param type  Type of View
      */
-    public CatalogNGTreeView( Composite parent ) {
-        this(parent, true);
+    public CatalogNGTreeView( Composite parent, String type ) {
+        //this(parent, true);
+        this(parent,true,type);
                                                                                 
     }
+    
     /**
      * Construct <code>CatalogNGTreeView</code>.
      * 
@@ -106,16 +119,13 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         setUseHashlookup(true);
         
         //set filtered input here to show only ServiceTypes etc depending on view
-        //setInput(CatalogServiceTypePlugin.getDefault().getLocalCatalog());
-        //setInput(CatalogNGPlugin.getDefault().getLocalCatalog());
-        
-        
         /**
          * @todo    call a filter function here that returns a CatalogImpl object with the required filtered tree
          */
-        //setInput(CatalogPlugin.getDefault().getLocalCatalog());
-        //setInput(CatalogPlugin.getDefault().getLocalCatalog());
-        setInput(treeFilter.getServiceTypes((CatalogImpl)CatalogPlugin.getDefault().getLocalCatalog()));
+        
+        //setInput(treeFilter.getServiceTypes((CatalogImpl)CatalogPlugin.getDefault().getLocalCatalog()));
+        setInput(treeFilter.getCatalogTree(type));
+        
         
         if(DEBUG){
             CatalogImpl debugCatImpl = (CatalogImpl) CatalogPlugin.getDefault().getLocalCatalog();
@@ -126,6 +136,7 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
             while(itr.hasNext()){
                 System.out.print("ELMNT"+itr.next());
             }
+            
         }
         
         //System.out.print(CatalogPlugin.getDefault().getLocalCatalog());
