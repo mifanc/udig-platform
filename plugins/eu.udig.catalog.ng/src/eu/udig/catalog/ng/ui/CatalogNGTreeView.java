@@ -20,8 +20,12 @@ package eu.udig.catalog.ng.ui;
 //import net.refractions.udig.catalog.CatalogServiceTypePlugin;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.ID;
@@ -123,9 +127,7 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
          * @todo    call a filter function here that returns a CatalogImpl object with the required filtered tree
          */
         
-        //setInput(treeFilter.getServiceTypes((CatalogImpl)CatalogPlugin.getDefault().getLocalCatalog()));
-        setInput(treeFilter.getCatalogTree(type));
-        
+        setInput(treeFilter.getInputTree(type));
         
         if(DEBUG){
             CatalogImpl debugCatImpl = (CatalogImpl) CatalogPlugin.getDefault().getLocalCatalog();
