@@ -73,56 +73,20 @@ public class CatalogNGTreeFilter {
     
     
     /**
-     * Filter catalogs and create a MemoryCatalog based on view to return to the Tree
-     * @param viewType
-     * @return ISearch MemoryCatalog Implementation for the TreeView
+     * Return a suitable input object for the Tree View based on the type of view
+     * <p>
+     * The following types will be returned based on the view
+     * <ul>
+     * <li>Service Type View - List with String values for Categorizations
+     * <li>Service View - List with String values for Categorizations
+     * <li>Data Type View - List with String values for Categorizations
+     * <li>Layer View - List with String values for Categorizations
+     * </ul>
+     * </p>
+     * 
+     * @param viewType  Type of view
+     * @return generic Object
      */
-    public ISearch getCatalogTree(String viewType){
-        //I'd like to use switch here on the String which apparently is appearing in Java SE7. For now..
-        if(viewType.equalsIgnoreCase("servicetypeview")){
-            System.out.println("Inside servicetpview");
-            foundCatalogs = new ArrayList<IResolve>();
-            for (ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
-                System.out.println("found 1 catlaog");
-                try{
-                    foundCatalogs.addAll(searchCatalog.search(".*", null, null));
-                }
-                catch(IOException ioe){
-                    ioe.printStackTrace();
-                }
-            }
-            
-            try {
-                foundCatalogs = CatalogPlugin.getDefault().getLocalCatalog().members(null);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            System.out.println("foundcatalog= "+foundCatalogs.size());
-            //Debug
-            for (IResolve resolved : foundCatalogs){
-                System.out.println("Title "+resolved.getTitle());
-                System.out.println("Class "+resolved.getClass().getName());
-                
-            }
-         
-            //Convert IResolves from above to services and create  a ISearch
-            //TEST
-            //MemoryCatalog localCatalog = new MemoryCatalog(new ID(CatalogPlugin.getDefault().getLocalCatalog().getID(),"file"), "LocalMemoryCatalog", null);
-           
-        }
-        else if(viewType.equalsIgnoreCase("serviceview")){
-            
-        }
-        else if(viewType.equalsIgnoreCase("datatypeview")){
-            
-        }
-        else if(viewType.equalsIgnoreCase("layerview")){
-            
-        }
-        return localCatalog;
-    }
-    
     public Object getInputTree(String viewType){
         //I'd like to use switch here on the String which apparently is appearing in Java SE7. For now..
         if(viewType.equalsIgnoreCase("servicetypeview")){
@@ -144,6 +108,7 @@ public class CatalogNGTreeFilter {
      * Iterate through a set of IResolves and build a service type list 
      *  of string values for the tree viewer
      *  @todo   Standardize names from Messages
+     *  @todo   Get total list of classes from geotools
      * @return List ArrayList of String values for ServiceTypes
      */
     public List<String> buildServiceTypeList(){
@@ -154,14 +119,14 @@ public class CatalogNGTreeFilter {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
                     if( resolveItem.canResolve(ShapefileDataStore.class))
-                        serviceText.add("File");
+                        serviceText.add("File"); //$NON-NLS-1$
                     else if( resolveItem.canResolve(WebMapServer.class))
-                        serviceText.add("Web");
+                        serviceText.add("Web"); //$NON-NLS-1$
                     else if( resolveItem.canResolve(PostgisDataStore.class))
-                        serviceText.add("Database");
+                        serviceText.add("Database"); //$NON-NLS-1$
                     //Location for everything else
                     else
-                        serviceText.add("Uncategorized");     
+                        serviceText.add("Uncategorized"); //$NON-NLS-1$    
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
