@@ -25,6 +25,7 @@ public class Messages extends NLS {
     public static String ServiceType_Directory;
     public static String ServiceType_Web;
     public static String ServiceType_Database;
+    public static String ServiceType_Uncategorized;
 
     
     static {
