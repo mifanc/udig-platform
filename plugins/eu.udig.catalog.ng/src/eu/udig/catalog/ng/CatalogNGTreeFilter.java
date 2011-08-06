@@ -23,9 +23,15 @@ import java.util.Set;
 
 import javax.xml.ws.WebFault;
 
+import org.geotools.data.db2.DB2NGDataStoreFactory;
+import org.geotools.data.h2.H2DataStoreFactory;
 import org.geotools.data.postgis.PostgisDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.wfs.WFSDataStore;
 import org.geotools.data.wms.WebMapServer;
+import org.geotools.data.wps.WebProcessingService;
+
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.ICatalog;
@@ -98,21 +104,22 @@ public class CatalogNGTreeFilter {
      * </p>
      * 
      * @param viewType  Type of view
+     * @param selection selection value
      * @return generic Object
      */
-    public Object getInputTree(String viewType){
+    public Object getInputTree(String viewType, Object selection){
         //I'd like to use switch here on the String which apparently is appearing in Java SE7. For now..
         if(viewType.equalsIgnoreCase("servicetypeview")){
             return buildServiceTypeList();
         }
         else if(viewType.equalsIgnoreCase("serviceview")){
-            
+            return buildServiceList(selection);
         }
         else if(viewType.equalsIgnoreCase("datatypeview")){
-            
+            return null;
         }
         else if(viewType.equalsIgnoreCase("layerview")){
-            
+            return null;
         }
         return new Object();
     }
@@ -122,6 +129,7 @@ public class CatalogNGTreeFilter {
      *  of string values for the tree viewer
      *  @todo   Standardize names from Messages
      *  @todo   Get total list of classes from geotools
+     *  @todo   Fix issues with l10n NLS message missing - ignoring currently
      * @return List ArrayList of String values for ServiceTypes
      */
     public List<String> buildServiceTypeList(){
@@ -131,15 +139,20 @@ public class CatalogNGTreeFilter {
             try {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    System.out.println("service "+resolveItem.getTitle());
                     if( resolveItem.canResolve(ShapefileDataStore.class))
-                        serviceText.add(Messages.ServiceType_File);
+                        //serviceText.add(Messages.ServiceType_File);
+                      serviceText.add("File"); //$NON-NLS-1$
                     else if( resolveItem.canResolve(WebMapServer.class))
-                        serviceText.add(Messages.ServiceType_Web);
+                        //serviceText.add(Messages.ServiceType_Web);
+                        serviceText.add("Web");//$NON-NLS-1$
                     else if( resolveItem.canResolve(PostgisDataStore.class))
-                        serviceText.add(Messages.ServiceType_Database);
+                        //serviceText.add(Messages.ServiceType_Database);
+                        serviceText.add("Database");//$NON-NLS-1$
                     //Location for everything else
                     else
-                        serviceText.add(Messages.ServiceType_Uncategorized);    
+                        //serviceText.add(Messages.ServiceType_Uncategorized);
+                        serviceText.add("Uncategorized");//$NON-NLS-1$
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -148,6 +161,59 @@ public class CatalogNGTreeFilter {
         }
         return new ArrayList<String>(serviceText);
     }
+    
+    /**
+     * Iterate through a set of IResolves and build a service list 
+     *  of string values for the tree viewer based on selected service type
+     *  @todo   Standardize names from Messages
+     *  @todo   Get total list of classes from geotools
+     *  @todo   Fix issues with l10n NLS message missing - ignoring currently
+     * @param serviceType selected service type
+     * @return List ArrayList of String values for ServiceTypes
+     */
+    public List<String> buildServiceList(Object serviceType){
+        //Usage of Set ensures non-duplication of Service Type values
+        serviceText = new HashSet<String>();
+        String serviceTypeValue = (String)serviceType;
+        for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
+            try {
+                for( IResolve resolveItem : searchCatalog.members(null)){
+                    //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    if(serviceTypeValue.equalsIgnoreCase("file")){
+                        if( resolveItem.canResolve(ShapefileDataStore.class))
+                          serviceText.add(resolveItem.getTitle());
+                    }
+                    else if(serviceTypeValue.equalsIgnoreCase("web")){
+                        if( resolveItem.canResolve(WebMapServer.class)          || 
+                            resolveItem.canResolve(WebProcessingService.class)  ||
+                            resolveItem.canResolve(WFSDataStore.class)
+                        )
+                            serviceText.add(resolveItem.getTitle());
+                        
+                        
+                    }
+                    else if(serviceTypeValue.equalsIgnoreCase("database")){
+                        if( resolveItem.canResolve(PostgisDataStore.class)      ||
+                            resolveItem.canResolve(MysqlDataSource.class)       ||
+                            resolveItem.canResolve(DB2NGDataStoreFactory.class) ||
+                            resolveItem.canResolve(H2DataStoreFactory.class)
+                        )     
+                            serviceText.add(resolveItem.getTitle());
+                        
+                    }
+                    else{
+                        //Handle uncategorized
+                        serviceText.add(resolveItem.getTitle());
+                    }
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<String>(serviceText);
+    }
+
     
 }
 

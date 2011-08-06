@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ViewPart;
 
+import eu.udig.catalog.ng.CatalogNGTreeFilter;
+
 /**
  * View for Service Type - the first level in the catalog browse view. 
  * <p>
@@ -51,6 +53,7 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
     
     //setup tree view
     CatalogNGTreeView treeViewer;
+    CatalogNGTreeFilter treeFilter;
     
     //actions for service type
     private Action removeAction;
@@ -65,9 +68,16 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
         // TODO Auto-generated method stub
         //treeViewer = new CatalogNGTreeView(parent, true);
         treeViewer = new CatalogNGTreeView(parent, TYPE_ID);
+        treeFilter = new CatalogNGTreeFilter();
+        
+        treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,null));
+        
         treeViewer.setMessageBoard(new StatusLineMessageBoardAdapter(getViewSite().getActionBars().getStatusLineManager()));
         UDIGDragDropUtilities.addDragDropSupport(treeViewer, this);
+        //Publish selection events
+        //@todo Make this view specific?
         getSite().setSelectionProvider(treeViewer);
+        
 
         
     }

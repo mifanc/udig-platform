@@ -127,8 +127,9 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
          * @todo    call a filter function here that returns a CatalogImpl object with the required filtered tree
          */
         
-        setInput(treeFilter.getInputTree(type));
+        //setInput(treeFilter.getInputTree(type));
         
+        /*
         if(DEBUG){
             CatalogImpl debugCatImpl = (CatalogImpl) CatalogPlugin.getDefault().getLocalCatalog();
             System.out.print(debugCatImpl);
@@ -140,13 +141,13 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
             }
             
         }
-        
+        */
         //System.out.print(CatalogPlugin.getDefault().getLocalCatalog());
         
         //set custom sorter instead of CatalogViewerSorter
-        setSorter(new CatalogViewerSorter());
+        //setSorter(new CatalogViewerSorter());
         
-        addSelectionChangedListener(this);
+        //addSelectionChangedListener(this);
         
     }
     @Override
