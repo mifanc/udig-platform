@@ -1,5 +1,16 @@
-/**
- * 
+/* uDig - User Friendly Desktop Internet GIS client
+ * http://udig.refractions.net
+ * (C) 2004, Refractions Research Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  */
 package eu.udig.catalog.ng;
 
@@ -26,6 +37,8 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.internal.CatalogImpl;
 import net.refractions.udig.catalog.memory.MemoryCatalog;
 
+import eu.udig.catalog.ng.ui.internal.Messages;
+
 /**
  * TODO Purpose of 
  * <p>
@@ -33,7 +46,7 @@ import net.refractions.udig.catalog.memory.MemoryCatalog;
  * <li></li>
  * </ul>
  * </p>
- * @author nazgul
+ * @author Mifan Careem mifanc@gmail.com
  * @since 1.2.0
  */
 
@@ -119,14 +132,14 @@ public class CatalogNGTreeFilter {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
                     if( resolveItem.canResolve(ShapefileDataStore.class))
-                        serviceText.add("File"); //$NON-NLS-1$
+                        serviceText.add(Messages.ServiceType_File);
                     else if( resolveItem.canResolve(WebMapServer.class))
-                        serviceText.add("Web"); //$NON-NLS-1$
+                        serviceText.add(Messages.ServiceType_Web);
                     else if( resolveItem.canResolve(PostgisDataStore.class))
-                        serviceText.add("Database"); //$NON-NLS-1$
+                        serviceText.add(Messages.ServiceType_Database);
                     //Location for everything else
                     else
-                        serviceText.add("Uncategorized"); //$NON-NLS-1$    
+                        serviceText.add(Messages.ServiceType_Uncategorized);    
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
