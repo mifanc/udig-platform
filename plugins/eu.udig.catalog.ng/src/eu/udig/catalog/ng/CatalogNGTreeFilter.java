@@ -168,6 +168,7 @@ public class CatalogNGTreeFilter {
      *  @todo   Standardize names from Messages
      *  @todo   Get total list of classes from geotools
      *  @todo   Fix issues with l10n NLS message missing - ignoring currently
+     *  @todo   Handle uncategorized
      * @param serviceType selected service type
      * @return List ArrayList of String values for ServiceTypes
      */
@@ -183,26 +184,34 @@ public class CatalogNGTreeFilter {
                         if( resolveItem.canResolve(ShapefileDataStore.class))
                           serviceText.add(resolveItem.getTitle());
                     }
+                    
                     else if(serviceTypeValue.equalsIgnoreCase("web")){
-                        if( resolveItem.canResolve(WebMapServer.class)          || 
-                            resolveItem.canResolve(WebProcessingService.class)  ||
-                            resolveItem.canResolve(WFSDataStore.class)
-                        )
-                            serviceText.add(resolveItem.getTitle());
-                        
+                        if( resolveItem.canResolve(WebMapServer.class) )
+                            serviceText.add("WMS");
+                        else if( resolveItem.canResolve(WebProcessingService.class) )
+                            serviceText.add("WPS");   
+                        else if( resolveItem.canResolve(WFSDataStore.class) )
+                            serviceText.add("WFS");   
                         
                     }
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
-                        if( resolveItem.canResolve(PostgisDataStore.class)      ||
-                            resolveItem.canResolve(MysqlDataSource.class)       ||
-                            resolveItem.canResolve(DB2NGDataStoreFactory.class) ||
-                            resolveItem.canResolve(H2DataStoreFactory.class)
-                        )     
+                        if( resolveItem.canResolve(PostgisDataStore.class) )
+                            serviceText.add("PostGIS");
+                        else if( resolveItem.canResolve(MysqlDataSource.class) )
+                            serviceText.add("MySQL");
+                        else if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
+                            serviceText.add("DB2");
+                        else if(resolveItem.canResolve(H2DataStoreFactory.class))
+                            serviceText.add("DB2");
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("uncategorized")){
+                            //Add ever
                             serviceText.add(resolveItem.getTitle());
-                        
                     }
                     else{
                         //Handle uncategorized
+                        //Handle All
                         serviceText.add(resolveItem.getTitle());
                     }
                 }
