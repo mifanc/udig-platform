@@ -14,6 +14,8 @@
  */
 package eu.udig.catalog.ng;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,6 +25,7 @@ import java.util.Set;
 
 import javax.xml.ws.WebFault;
 
+import org.geotools.data.DataStore;
 import org.geotools.data.db2.DB2NGDataStoreFactory;
 import org.geotools.data.h2.H2DataStoreFactory;
 import org.geotools.data.postgis.PostgisDataStore;
@@ -150,6 +153,7 @@ public class CatalogNGTreeFilter {
                         //serviceText.add(Messages.ServiceType_Database);
                         serviceText.add("Database");//$NON-NLS-1$
                     //Location for everything else
+                    //Where does Decoration go?
                     else
                         //serviceText.add(Messages.ServiceType_Uncategorized);
                         serviceText.add("Uncategorized");//$NON-NLS-1$
@@ -176,37 +180,48 @@ public class CatalogNGTreeFilter {
         //Usage of Set ensures non-duplication of Service Type values
         serviceText = new HashSet<String>();
         String serviceTypeValue = (String)serviceType;
+        File thisFile,parentFile;
         for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
             try {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
                     if(serviceTypeValue.equalsIgnoreCase("file")){
-                        if( resolveItem.canResolve(ShapefileDataStore.class))
-                          serviceText.add(resolveItem.getTitle());
+                        //do adhoc directory grouping here as per proposal   
+                        if( resolveItem.canResolve(ShapefileDataStore.class)){
+                            //Quick hack to store directory. Get better way to do this
+                                thisFile = new File(resolveItem.getTitle());
+                                parentFile = thisFile.getParentFile();
+                                if(parentFile.isDirectory()){
+                                    //trust a set to keep this unique in a simple manner
+                                    serviceText.add("DIR: "+parentFile.getName());
+                                    //serviceText.add(resolveItem.getTitle());
+                                }
+                           
+                              
+                        }     
                     }
                     
                     else if(serviceTypeValue.equalsIgnoreCase("web")){
                         if( resolveItem.canResolve(WebMapServer.class) )
-                            serviceText.add("WMS");
+                            serviceText.add("WMS: "+resolveItem.getTitle());
                         else if( resolveItem.canResolve(WebProcessingService.class) )
-                            serviceText.add("WPS");   
+                            serviceText.add("WPS: "+resolveItem.getTitle());   
                         else if( resolveItem.canResolve(WFSDataStore.class) )
-                            serviceText.add("WFS");   
-                        
+                            serviceText.add("WFS: "+resolveItem.getTitle());
+
                     }
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
                         if( resolveItem.canResolve(PostgisDataStore.class) )
-                            serviceText.add("PostGIS");
+                            serviceText.add("PostGIS: "+resolveItem.getTitle());
                         else if( resolveItem.canResolve(MysqlDataSource.class) )
-                            serviceText.add("MySQL");
+                            serviceText.add("MySQL: "+resolveItem.getTitle());
                         else if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
-                            serviceText.add("DB2");
+                            serviceText.add("DB2: "+resolveItem.getTitle());
                         else if(resolveItem.canResolve(H2DataStoreFactory.class))
-                            serviceText.add("DB2");
+                            serviceText.add("H2: "+resolveItem.getTitle());
                     }
                     
                     else if(serviceTypeValue.equalsIgnoreCase("uncategorized")){
-                            //Add ever
                             serviceText.add(resolveItem.getTitle());
                     }
                     else{
