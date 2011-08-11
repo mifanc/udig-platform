@@ -43,11 +43,15 @@ import net.refractions.udig.catalog.ui.internal.Messages;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -111,7 +115,9 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
      */
     public CatalogNGTreeView( Composite parent, int style, boolean titles, String type ) {
         super(parent, style|SWT.VIRTUAL);
+        
         setContentProvider(new ResolveContentProvider());
+        /*
         ResolveLabelProviderSimple resolveLabelProviderSimple = new ResolveLabelProviderSimple();
         if (titles) {
             setLabelProvider(new DecoratingLabelProvider(resolveLabelProviderSimple,
@@ -119,35 +125,11 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         } else {
             setLabelProvider(resolveLabelProviderSimple);
         }
-        
+        */
+        //setContentProvider(getContentProvider());
+        setLabelProvider(getLabelProvider());
         setUseHashlookup(true);
         
-        //set filtered input here to show only ServiceTypes etc depending on view
-        /**
-         * @todo    call a filter function here that returns a CatalogImpl object with the required filtered tree
-         */
-        
-        //setInput(treeFilter.getInputTree(type));
-        
-        /*
-        if(DEBUG){
-            CatalogImpl debugCatImpl = (CatalogImpl) CatalogPlugin.getDefault().getLocalCatalog();
-            System.out.print(debugCatImpl);
-            System.out.print("List Count"+debugCatImpl.members(null).size());
-            Iterator itr;
-            itr = debugCatImpl.members(null).iterator();
-            while(itr.hasNext()){
-                System.out.print("ELMNT"+itr.next());
-            }
-            
-        }
-        */
-        //System.out.print(CatalogPlugin.getDefault().getLocalCatalog());
-        
-        //set custom sorter instead of CatalogViewerSorter
-        //setSorter(new CatalogViewerSorter());
-        
-        //addSelectionChangedListener(this);
         
     }
     @Override
@@ -201,5 +183,38 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         this.messageBoard=messageBoard;
     }
     
+    /**
+     * LabelProvider; override to take charge of your labels and icons.
+     * 
+     * @return LabelProvider for use with the viewer
+     */
+    protected IBaseLabelProvider createLabelProvider() {
+        return new LabelProvider();
+    }
+
+    /**
+     * Default implementation will work for lists, please overide if
+     * you are into the whole tree thing.
+     * 
+     * @return
+     */
+    protected IStructuredContentProvider createContentProvider() {
+        return new IStructuredContentProvider() {
+            @SuppressWarnings("unchecked")
+            public Object[] getElements( Object inputElement ) {
+                if( inputElement instanceof List ) {
+                    return ((List)inputElement).toArray();
+                }
+                return null;
+            }
+            public void dispose() {
+            }
+            public void inputChanged( Viewer viewer, Object oldInput, Object newInput ) {
+                assert( newInput instanceof List );
+                // lists don't have events for us to watch
+            }            
+        };
+    }
+
 
 }

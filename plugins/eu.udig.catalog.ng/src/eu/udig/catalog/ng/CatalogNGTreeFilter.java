@@ -46,6 +46,7 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.internal.CatalogImpl;
 import net.refractions.udig.catalog.memory.MemoryCatalog;
 
+import eu.udig.catalog.ng.internal.ServiceTypeElement;
 import eu.udig.catalog.ng.ui.internal.Messages;
 
 /**
@@ -70,6 +71,7 @@ public class CatalogNGTreeFilter {
     public List<IResolve> foundCatalogs;
     public List<IResolve> foundCatalogItems;
     public Set<String> serviceText;
+    public Set<ServiceTypeElement> serviceTypeSet;
     
     MemoryCatalog localCatalog;
     
@@ -135,7 +137,7 @@ public class CatalogNGTreeFilter {
      *  @todo   Fix issues with l10n NLS message missing - ignoring currently
      * @return List ArrayList of String values for ServiceTypes
      */
-    public List<String> buildServiceTypeList(){
+    public List<String> buildServiceTypeList2(){
         //Usage of Set ensures non-duplication of Service Type values
         serviceText = new HashSet<String>();
         for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
@@ -167,6 +169,47 @@ public class CatalogNGTreeFilter {
     }
     
     /**
+     * Iterate through a set of IResolves and build a service type list 
+     *  of string values for the tree viewer
+     *  @todo   Standardize names from Messages
+     *  @todo   Get total list of classes from geotools
+     *  @todo   Fix issues with l10n NLS message missing - ignoring currently
+     * @return List ArrayList of String values for ServiceTypes
+     */
+    public List<ServiceTypeElement> buildServiceTypeList(){
+        //Usage of Set ensures non-duplication of Service Type values
+        //serviceText = new HashSet<String>();
+        serviceTypeSet = new HashSet<ServiceTypeElement>();
+        for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
+            try {
+                for( IResolve resolveItem : searchCatalog.members(null)){
+                    //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    System.out.println("service "+resolveItem.getTitle());
+                    if( resolveItem.canResolve(ShapefileDataStore.class))
+                        //serviceText.add(Messages.ServiceType_File);
+                      //serviceText.add("File"); //$NON-NLS-1$
+                      serviceTypeSet.add(new ServiceTypeElement("File")); //$NON-NLS-1$
+                    else if( resolveItem.canResolve(WebMapServer.class))
+                        //serviceText.add(Messages.ServiceType_Web);
+                        serviceTypeSet.add(new ServiceTypeElement("Web")); //$NON-NLS-1$
+                    else if( resolveItem.canResolve(PostgisDataStore.class))
+                        //serviceText.add(Messages.ServiceType_Database);
+                        serviceTypeSet.add(new ServiceTypeElement("Database")); //$NON-NLS-1$
+                    //Location for everything else
+                    //Where does Decoration go?
+                    else
+                        //serviceText.add(Messages.ServiceType_Uncategorized);
+                        serviceTypeSet.add(new ServiceTypeElement("Uncategorized")); //$NON-NLS-1$
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<ServiceTypeElement>(serviceTypeSet);
+    }
+    
+    /**
      * Iterate through a set of IResolves and build a service list 
      *  of string values for the tree viewer based on selected service type
      *  @todo   Standardize names from Messages
@@ -187,6 +230,7 @@ public class CatalogNGTreeFilter {
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
                     if(serviceTypeValue.equalsIgnoreCase("file")){
                         //do adhoc directory grouping here as per proposal   
+                        //@todo only handling shp here. get all other local file types
                         if( resolveItem.canResolve(ShapefileDataStore.class)){
                             //Quick hack to store directory. Get better way to do this
                                 thisFile = new File(resolveItem.getTitle());
@@ -237,8 +281,94 @@ public class CatalogNGTreeFilter {
         }
         return new ArrayList<String>(serviceText);
     }
+    
+    /**
+     * Iterate through a set of IResolves and build a data type | feature type list 
+     *  of string values for the tree viewer
+     *  under construction
+     *  @todo   Display actual IResolves
+     *  @todo   Use service type, service, data type as params - accept null values
+     *  @todo   Standardize names from Messages
+     *  @todo   Get total list of classes from geotools
+     *  @todo   Fix issues with l10n NLS message missing - ignoring currently
+     * @return List ArrayList of String values for ServiceTypes
+     */
+    public List<String> buildDataTypeList(Object selectedServiceName, Object currentServiceTypeName){
+        //Usage of Set ensures non-duplication of Service Type values
+        serviceText = new HashSet<String>();
+        for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
+            try {
+                for( IResolve resolveItem : searchCatalog.members(null)){
+                    //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    System.out.println("service "+resolveItem.getTitle());
+                    if( resolveItem.canResolve(ShapefileDataStore.class))
+                        //serviceText.add(Messages.ServiceType_File);
+                      serviceText.add("File"); //$NON-NLS-1$
+                    else if( resolveItem.canResolve(WebMapServer.class))
+                        //serviceText.add(Messages.ServiceType_Web);
+                        serviceText.add("Web");//$NON-NLS-1$
+                    else if( resolveItem.canResolve(PostgisDataStore.class))
+                        //serviceText.add(Messages.ServiceType_Database);
+                        serviceText.add("Database");//$NON-NLS-1$
+                    //Location for everything else
+                    //Where does Decoration go?
+                    else
+                        //serviceText.add(Messages.ServiceType_Uncategorized);
+                        serviceText.add("Uncategorized");//$NON-NLS-1$
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<String>(serviceText);
+    }
+
+    
+    /**
+     * Iterate through a set of IResolves and build a layer list 
+     *  of string values for the tree viewer
+     *  under construction
+     *  @todo   Display actual IResolves
+     *  @todo   Use service type, service, data type as params - accept null values
+     *  @todo   Standardize names from Messages
+     *  @todo   Get total list of classes from geotools
+     *  @todo   Fix issues with l10n NLS message missing - ignoring currently
+     * @return List ArrayList of String values for ServiceTypes
+     */
+    public List<String> buildLayerList(){
+        //Usage of Set ensures non-duplication of Service Type values
+        serviceText = new HashSet<String>();
+        for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
+            try {
+                for( IResolve resolveItem : searchCatalog.members(null)){
+                    //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    System.out.println("service "+resolveItem.getTitle());
+                    if( resolveItem.canResolve(ShapefileDataStore.class))
+                        //serviceText.add(Messages.ServiceType_File);
+                      serviceText.add("File"); //$NON-NLS-1$
+                    else if( resolveItem.canResolve(WebMapServer.class))
+                        //serviceText.add(Messages.ServiceType_Web);
+                        serviceText.add("Web");//$NON-NLS-1$
+                    else if( resolveItem.canResolve(PostgisDataStore.class))
+                        //serviceText.add(Messages.ServiceType_Database);
+                        serviceText.add("Database");//$NON-NLS-1$
+                    //Location for everything else
+                    //Where does Decoration go?
+                    else
+                        //serviceText.add(Messages.ServiceType_Uncategorized);
+                        serviceText.add("Uncategorized");//$NON-NLS-1$
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<String>(serviceText);
+    }
 
     
 }
+
 
 
