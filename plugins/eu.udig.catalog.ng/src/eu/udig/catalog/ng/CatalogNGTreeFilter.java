@@ -33,6 +33,7 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.wfs.WFSDataStore;
 import org.geotools.data.wms.WebMapServer;
 import org.geotools.data.wps.WebProcessingService;
+import org.geotools.gce.geotiff.GeoTiffFormat;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -46,6 +47,7 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.internal.CatalogImpl;
 import net.refractions.udig.catalog.memory.MemoryCatalog;
 
+import eu.udig.catalog.ng.internal.DataTypeElement;
 import eu.udig.catalog.ng.internal.ServiceElement;
 import eu.udig.catalog.ng.internal.ServiceTypeElement;
 import eu.udig.catalog.ng.ui.internal.Messages;
@@ -75,6 +77,7 @@ public class CatalogNGTreeFilter {
     
     public Set<ServiceTypeElement> serviceTypeSet;
     public Set<ServiceElement> serviceElementSet;
+    public Set<DataTypeElement> dataTypeElementSet;
     
     MemoryCatalog localCatalog;
     
@@ -115,7 +118,7 @@ public class CatalogNGTreeFilter {
      * @param selection selection value
      * @return generic Object
      */
-    public Object getInputTree(String viewType, Object selection){
+    public Object getInputTree(String viewType, Object selection, Object persSelection){
         //I'd like to use switch here on the String which apparently is appearing in Java SE7. For now..
         if(viewType.equalsIgnoreCase("servicetypeview")){
             return buildServiceTypeList();
@@ -124,7 +127,7 @@ public class CatalogNGTreeFilter {
             return buildServiceList(selection);
         }
         else if(viewType.equalsIgnoreCase("datatypeview")){
-            return null;
+            return buildDataTypeList(selection, persSelection);
         }
         else if(viewType.equalsIgnoreCase("layerview")){
             return null;
@@ -264,35 +267,81 @@ public class CatalogNGTreeFilter {
      *  @todo   Fix issues with l10n NLS message missing - ignoring currently
      * @return List ArrayList of String values for ServiceTypes
      */
-    public List<String> buildDataTypeList(Object selectedServiceName, Object currentServiceTypeName){
+    public List<DataTypeElement> buildDataTypeList(Object selectedServiceName, Object currentServiceTypeName){
         //Usage of Set ensures non-duplication of Service Type values
-        serviceText = new HashSet<String>();
+        dataTypeElementSet = new HashSet<DataTypeElement>();
+        String serviceTypeValue = (String)currentServiceTypeName;
+        String serviceName = (String)selectedServiceName;
+        File thisFile,parentFile;
         for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
             try {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
-                    System.out.println("service "+resolveItem.getTitle());
-                    if( resolveItem.canResolve(ShapefileDataStore.class))
-                        //serviceText.add(Messages.ServiceType_File);
-                      serviceText.add("File"); //$NON-NLS-1$
-                    else if( resolveItem.canResolve(WebMapServer.class))
-                        //serviceText.add(Messages.ServiceType_Web);
-                        serviceText.add("Web");//$NON-NLS-1$
-                    else if( resolveItem.canResolve(PostgisDataStore.class))
-                        //serviceText.add(Messages.ServiceType_Database);
-                        serviceText.add("Database");//$NON-NLS-1$
-                    //Location for everything else
-                    //Where does Decoration go?
-                    else
-                        //serviceText.add(Messages.ServiceType_Uncategorized);
-                        serviceText.add("Uncategorized");//$NON-NLS-1$
+                    if(serviceTypeValue.equalsIgnoreCase("file")){
+                        //adhoc grouped directories here as per proposal   
+                        //@todo only handling shp here. get all other local file types
+                        if( resolveItem.canResolve(ShapefileDataStore.class) ||
+                            resolveItem.canResolve(GeoTiffFormat.class)
+                        ){
+                            //Quick hack to store directory. Get better way to do this
+                                thisFile = new File(resolveItem.getTitle());
+                                parentFile = thisFile.getParentFile();
+                                if(parentFile.isDirectory() && parentFile.getName().equalsIgnoreCase(serviceName)){
+                                    //trust a set to keep this unique in a simple manner
+                                    //serviceText.add("DIR: "+parentFile.getName());
+                                    dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                                    //serviceText.add(resolveItem.getTitle());
+                                }
+                           
+                              
+                        }     
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("web")){
+                        if( resolveItem.canResolve(WebMapServer.class)  || 
+                            resolveItem.canResolve(WebProcessingService.class) ||
+                            resolveItem.canResolve(WFSDataStore.class)
+                        ){
+                            for(IResolve layer : resolveItem.members(null)){
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, layer.getTitle()));
+                            }
+                        }
+                            
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("database")){
+                        if( resolveItem.canResolve(PostgisDataStore.class) )
+                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                            //serviceText.add("PostGIS: "+resolveItem.getTitle());
+                        else if( resolveItem.canResolve(MysqlDataSource.class) )
+                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                            //serviceText.add("MySQL: "+resolveItem.getTitle());
+                        else if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
+                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                            //serviceText.add("DB2: "+resolveItem.getTitle());
+                        else if(resolveItem.canResolve(H2DataStoreFactory.class))
+                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                            //serviceText.add("H2: "+resolveItem.getTitle());
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("uncategorized")){
+                        dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                        //serviceText.add(resolveItem.getTitle());
+                    }
+                    else{
+                        //Handle uncategorized
+                        //Handle All
+                        dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                        //serviceText.add(resolveItem.getTitle());
+                    }
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        return new ArrayList<String>(serviceText);
+        return new ArrayList<DataTypeElement>(dataTypeElementSet);
+
     }
 
     

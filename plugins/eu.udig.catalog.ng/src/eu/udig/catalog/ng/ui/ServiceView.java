@@ -69,7 +69,7 @@ public class ServiceView extends ViewPart implements ISelectionListener {
         treeFilter = new CatalogNGTreeFilter();
         
         //treeViewer.setInput(null);
-        treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,new String("all")));
+        treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,new String("all"),new String("all")));
         treeViewer.setMessageBoard(new StatusLineMessageBoardAdapter(getViewSite().getActionBars().getStatusLineManager()));
         
         //listen to selection events from other views
@@ -96,7 +96,7 @@ public class ServiceView extends ViewPart implements ISelectionListener {
             if ( selected instanceof ServiceTypeElement){
                 selectionValue = ((ServiceTypeElement)selected).getServiceTypeName();
                 System.out.println("SELECTION: "+selectionValue);
-                treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selectionValue));
+                treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selectionValue,null));
             }
             //Create tree  based on selection
             //treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selected));

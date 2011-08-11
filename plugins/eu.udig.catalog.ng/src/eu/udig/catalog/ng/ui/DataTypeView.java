@@ -27,6 +27,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
+import eu.udig.catalog.ng.internal.DataTypeElement;
+import eu.udig.catalog.ng.internal.ServiceElement;
+import eu.udig.catalog.ng.internal.ServiceTypeElement;
 
 /**
  * View for Data types- the 3rd level in the catalog browse view. 
@@ -51,6 +54,8 @@ public class DataTypeView extends ViewPart implements ISelectionListener {
     private CatalogNGTreeView treeViewer;
     private CatalogNGTreeFilter treeFilter;
     
+    private String selectionValue,persSelectionValue;
+    
   //actions for service type
     private Action removeAction;
     private Action propertiesAction;
@@ -67,8 +72,8 @@ public class DataTypeView extends ViewPart implements ISelectionListener {
         treeViewer = new CatalogNGTreeView(parent, TYPE_ID);
         treeFilter = new CatalogNGTreeFilter();
         
-        //treeViewer.setInput(null);
-        treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,new String("all")));
+        treeViewer.setInput(null);
+        //treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,new String("all"),new String("all")));
         treeViewer.setMessageBoard(new StatusLineMessageBoardAdapter(getViewSite().getActionBars().getStatusLineManager()));
         
         //listen to selection events from other views
@@ -77,7 +82,7 @@ public class DataTypeView extends ViewPart implements ISelectionListener {
         
         //Publish selection events to other views
         //@todo Make this view specific?
-        getSite().setSelectionProvider(treeViewer);
+        //getSite().setSelectionProvider(treeViewer);
 
 
     }
@@ -93,8 +98,11 @@ public class DataTypeView extends ViewPart implements ISelectionListener {
         // TODO Auto-generated method stub
         if( selection instanceof IStructuredSelection){
             Object selected = ((IStructuredSelection) selection).getFirstElement();
-            //Create tree  based on selection
-            treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selected));
+            if ( selected instanceof ServiceElement){
+                selectionValue = ((ServiceElement)selected).getServiceName();
+                persSelectionValue = ((ServiceElement)selected).getServiceTypeName();
+                treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selectionValue,persSelectionValue));
+            }
         }
 
         

@@ -70,7 +70,7 @@ public class ServiceTypeView extends ViewPart implements ISetSelectionTarget, ID
         treeViewer = new CatalogNGTreeView(parent, TYPE_ID);
         treeFilter = new CatalogNGTreeFilter();
         
-        treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,null));
+        treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,null,null));
         
         treeViewer.setMessageBoard(new StatusLineMessageBoardAdapter(getViewSite().getActionBars().getStatusLineManager()));
         UDIGDragDropUtilities.addDragDropSupport(treeViewer, this);
