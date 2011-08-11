@@ -117,6 +117,7 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         super(parent, style|SWT.VIRTUAL);
         
         setContentProvider(new ResolveContentProvider());
+        
         /*
         ResolveLabelProviderSimple resolveLabelProviderSimple = new ResolveLabelProviderSimple();
         if (titles) {

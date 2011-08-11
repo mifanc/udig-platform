@@ -27,6 +27,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
+import eu.udig.catalog.ng.internal.ServiceTypeElement;
 
 /**
  * View for Services- the 2nd level in the catalog browse view. 
@@ -54,6 +55,8 @@ public class ServiceView extends ViewPart implements ISelectionListener {
     //actions for service type
     private Action removeAction;
     private Action propertiesAction;
+    
+    private String selectionValue;
 
     public ServiceView() {
         // TODO Auto-generated constructor stub
@@ -90,8 +93,14 @@ public class ServiceView extends ViewPart implements ISelectionListener {
         // TODO Auto-generated method stub
         if( selection instanceof IStructuredSelection){
             Object selected = ((IStructuredSelection) selection).getFirstElement();
+            if ( selected instanceof ServiceTypeElement){
+                selectionValue = ((ServiceTypeElement)selected).getServiceTypeName();
+                System.out.println("SELECTION: "+selectionValue);
+                treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selectionValue));
+            }
             //Create tree  based on selection
-            treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selected));
+            //treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selected));
+            
         }
         
         
