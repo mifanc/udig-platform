@@ -181,6 +181,9 @@ public class CatalogNGTreeFilter {
      * @return List ArrayList of String values for ServiceTypes
      */
     public List<ServiceElement> buildServiceList(Object serviceType){
+        //handle first time null usage
+        if(serviceType == null)
+            return new ArrayList<ServiceElement>();
         //Usage of Set ensures non-duplication of Service Type values
         serviceElementSet = new HashSet<ServiceElement>();
         String serviceTypeValue = (String)serviceType;
@@ -268,6 +271,10 @@ public class CatalogNGTreeFilter {
      * @return List ArrayList of String values for ServiceTypes
      */
     public List<DataTypeElement> buildDataTypeList(Object selectedServiceName, Object currentServiceTypeName){
+        //handle first time null
+        if(selectedServiceName == null)
+            return new ArrayList<DataTypeElement>();
+              
         //Usage of Set ensures non-duplication of Service Type values
         dataTypeElementSet = new HashSet<DataTypeElement>();
         String serviceTypeValue = (String)currentServiceTypeName;
