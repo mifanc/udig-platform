@@ -3,11 +3,16 @@
  */
 package eu.udig.catalog.ng.ui;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
+import eu.udig.catalog.ng.internal.ServiceTypeElement;
 
 /**
  * View for Service Type - the first level in the catalog browse view. 
@@ -26,7 +31,7 @@ import eu.udig.catalog.ng.CatalogNGTreeFilter;
  * @todo    ISelectionListener
  * @todo    Currently borrows from CatalogView - change to be unique
  */
-public class CatalogNGView extends CatalogNGViewPart {
+public class CatalogNGView extends CatalogNGViewPart implements ISelectionListener {
     
     public static final String VIEW_ID = "eu.udig.catalog.ng.ui.CatalongNGView"; //$NON-NLS-1$
     
@@ -37,6 +42,8 @@ public class CatalogNGView extends CatalogNGViewPart {
     
     private CatalogNGTreeView treeViewerServiceType,treeViewerService,treeViewerDataType;
     private CatalogNGTreeFilter treeFilterServiceType,treeFilterService,treeFilterDataType;
+    
+    String selectionValue = "";
     
 
     /**
@@ -54,11 +61,19 @@ public class CatalogNGView extends CatalogNGViewPart {
         treeFilterServiceType = new CatalogNGTreeFilter();
         
         treeViewerServiceType.setInput(treeFilterServiceType.getInputTree(SERVICE_TYPE_ID,null,null));
+    
         
         
         treeViewerService = new CatalogNGTreeView(parent, SERVICE_ID);
         treeFilterService = new CatalogNGTreeFilter();
         treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,null,null));
+        
+        
+        //cannot have 2 selection providers withing a viewpart. Need to implement custom selectionproviders @see
+        getSite().setSelectionProvider(treeViewerServiceType);
+        //getSite().setSelectionProvider(treeViewerService);
+        
+        getViewSite().getPage().addSelectionListener(this);
         
         /*
         treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
@@ -69,6 +84,25 @@ public class CatalogNGView extends CatalogNGViewPart {
         parent.setLayout(layout);
         
         super.createPartControl(parent);
+    }
+
+
+    @Override
+    public void selectionChanged( IWorkbenchPart part, ISelection selection ) {
+        // TODO Auto-generated method stub
+        if( selection instanceof IStructuredSelection){
+            Object selected = ((IStructuredSelection) selection).getFirstElement();
+            
+            if ( selected instanceof ServiceTypeElement){
+                selectionValue = ((ServiceTypeElement)selected).getServiceTypeName();
+                System.out.println("SELECTION: "+selectionValue);
+                treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,selectionValue,null));
+            }
+            //Create tree  based on selection
+            //treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selected));
+            
+        }
+        
     }
     
     
