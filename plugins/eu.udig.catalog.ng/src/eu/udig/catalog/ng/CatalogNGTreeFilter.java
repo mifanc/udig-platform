@@ -17,6 +17,7 @@ package eu.udig.catalog.ng;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,13 +30,19 @@ import org.geotools.data.DataStore;
 import org.geotools.data.db2.DB2NGDataStoreFactory;
 import org.geotools.data.h2.H2DataStoreFactory;
 import org.geotools.data.jdbc.JDBCDataStore;
+import org.geotools.data.oracle.OracleNGDataStoreFactory;
 import org.geotools.data.postgis.PostgisDataStore;
+import org.geotools.data.postgis.PostgisDataStoreFactory;
+import org.geotools.data.postgis.PostgisFeatureStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.wfs.WFSDataStore;
 import org.geotools.data.wms.WebMapServer;
 import org.geotools.data.wps.WebProcessingService;
 import org.geotools.gce.geotiff.GeoTiffFormat;
+import org.geotools.ows.OWS;
+import org.geotools.wfs.WFS;
 
+import com.mysql.jdbc.MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 import net.refractions.udig.catalog.CatalogPlugin;
@@ -80,6 +87,8 @@ public class CatalogNGTreeFilter {
     public Set<ServiceElement> serviceElementSet;
     public Set<DataTypeElement> dataTypeElementSet;
     public List<String> layers; //convert to IResolve
+    
+    private boolean DEBUG = false;
     
     MemoryCatalog localCatalog;
     
@@ -155,15 +164,31 @@ public class CatalogNGTreeFilter {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
                     //System.out.println("service "+resolveItem.getTitle());
-                    if( resolveItem.canResolve(ShapefileDataStore.class)    ||
-                        resolveItem.canResolve(GeoTiffFormat.class)         
-                        
-                      
+                    
+
+                    if( resolveItem.canResolve(ShapefileDataStore.class)        ||
+                        resolveItem.canResolve(GeoTiffFormat.class)                            
                     )
-                      serviceTypeSet.add(new ServiceTypeElement("File")); //$NON-NLS-1$
-                    else if( resolveItem.canResolve(WebMapServer.class))
+                        serviceTypeSet.add(new ServiceTypeElement("File")); //$NON-NLS-1$
+                    
+                    else if( resolveItem.canResolve(WebMapServer.class)         ||
+                             resolveItem.canResolve(WebProcessingService.class) ||
+                             resolveItem.canResolve(WFS.class)                  ||
+                             resolveItem.canResolve(WFSDataStore.class)         ||
+                             resolveItem.canResolve(OWS.class)
+                    )
                         serviceTypeSet.add(new ServiceTypeElement("Web")); //$NON-NLS-1$
-                    else if( resolveItem.canResolve(PostgisDataStore.class))
+                    
+                    else if( resolveItem.canResolve(PostgisDataStore.class)           ||
+                             resolveItem.canResolve(PostgisFeatureStore.class)        ||
+                             resolveItem.canResolve(PostgisDataStoreFactory.class)    ||
+                             resolveItem.canResolve(MySQLConnection.class)            ||
+                             resolveItem.canResolve(H2DataStoreFactory.class)         ||
+                             resolveItem.canResolve(OracleNGDataStoreFactory.class)   ||
+                             resolveItem.canResolve(DB2NGDataStoreFactory.class)      ||
+                             resolveItem.canResolve(Connection.class)
+                             
+                    )
                         serviceTypeSet.add(new ServiceTypeElement("Database")); //$NON-NLS-1$
                     //Location for everything else
                     //Where does Decoration go?
@@ -200,49 +225,52 @@ public class CatalogNGTreeFilter {
             try {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    
+                    /**
+                     * ServiceType: File
+                     * Operation:   Show adhoc parent directories
+                     */
                     if(serviceTypeValue.equalsIgnoreCase("file")){
                         //do adhoc directory grouping here as per proposal   
-                        //@todo only handling shp here. get all other local file types
-                        if( resolveItem.canResolve(ShapefileDataStore.class)){
+                        if( resolveItem.canResolve(ShapefileDataStore.class)        ||
+                            resolveItem.canResolve(GeoTiffFormat.class)                            
+                        ){
                             //Quick hack to store directory. Get better way to do this
                                 thisFile = new File(resolveItem.getTitle());
                                 parentFile = thisFile.getParentFile();
                                 if(parentFile.isDirectory()){
                                     //trust a set to keep this unique in a simple manner
-                                    //serviceText.add("DIR: "+parentFile.getName());
                                     serviceElementSet.add(new ServiceElement(serviceTypeValue, parentFile.getName()));
-                                    //serviceText.add(resolveItem.getTitle());
                                 }
-                           
-                              
                         }     
                     }
                     
+                    /**
+                     * ServiceType: Web
+                     * Operation:   Show Service Groupings (WMS, WFS, WPS etc.)
+                     */
                     else if(serviceTypeValue.equalsIgnoreCase("web")){
                         if( resolveItem.canResolve(WebMapServer.class) )
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("WMS: "+resolveItem.getTitle());
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "WMS"));
                         else if( resolveItem.canResolve(WebProcessingService.class) )
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("WPS: "+resolveItem.getTitle());   
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "WPS"));
                         else if( resolveItem.canResolve(WFSDataStore.class) )
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("WFS: "+resolveItem.getTitle());
-
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "WFS"));
                     }
+                    
+                    /**
+                     * ServiceType: Database
+                     * Operation:   Show database groupings (Oracle, PostGIS, MySQL etc.)
+                     */
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
                         if( resolveItem.canResolve(PostgisDataStore.class) )
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("PostGIS: "+resolveItem.getTitle());
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "PostGIS"));
                         else if( resolveItem.canResolve(MysqlDataSource.class) )
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("MySQL: "+resolveItem.getTitle());
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "MySQL"));
                         else if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("DB2: "+resolveItem.getTitle());
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "DB2"));
                         else if(resolveItem.canResolve(H2DataStoreFactory.class))
-                            serviceElementSet.add(new ServiceElement(serviceTypeValue, resolveItem.getTitle()));
-                            //serviceText.add("H2: "+resolveItem.getTitle());
+                            serviceElementSet.add(new ServiceElement(serviceTypeValue, "H2"));
                     }
                     
                     else if(serviceTypeValue.equalsIgnoreCase("uncategorized")){
@@ -270,8 +298,6 @@ public class CatalogNGTreeFilter {
     /**
      * Iterate through a set of IResolves and build a data type | feature type list 
      *  of string values for the tree viewer
-     *  under construction
-     *  @todo   Display actual IResolves
      *  @todo   Use service type, service, data type as params - accept null values
      *  @todo   Standardize names from Messages
      *  @todo   Get total list of classes from geotools
@@ -292,9 +318,12 @@ public class CatalogNGTreeFilter {
             try {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    /**
+                     * ServiceType: File
+                     * Service:     <name of directory>
+                     * Operation:   Show grouping of file type (Shapefile, GeoTIFF)
+                     */
                     if(serviceTypeValue.equalsIgnoreCase("file")){
-                        //adhoc grouped directories here as per proposal   
-                        //@todo only handling shp here. get all other local file types
                         if( resolveItem.canResolve(ShapefileDataStore.class) ||
                             resolveItem.canResolve(GeoTiffFormat.class)
                         ){
@@ -303,41 +332,61 @@ public class CatalogNGTreeFilter {
                                 parentFile = thisFile.getParentFile();
                                 if(parentFile.isDirectory() && parentFile.getName().equalsIgnoreCase(serviceName)){
                                     //trust a set to keep this unique in a simple manner
-                                    //dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
                                     if(resolveItem.canResolve(ShapefileDataStore.class))
-                                        dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, "Shapefile"));
+                                        dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, "ShapeFile"));
                                     else if(resolveItem.canResolve(GeoTiffFormat.class))
-                                        dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, "GeoTiff"));
+                                        dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, "GeoTIFF"));
 
                                 }
                         }     
                     }
                     
+                    /**
+                     * ServiceType: Web
+                     * Service: WMS, WFS, WPS, ...
+                     * Operation: Show Server names
+                     */
                     else if(serviceTypeValue.equalsIgnoreCase("web")){
-                        if( resolveItem.canResolve(WebMapServer.class)  || 
-                            resolveItem.canResolve(WebProcessingService.class) ||
-                            resolveItem.canResolve(WFSDataStore.class)
-                        ){
-                            for(IResolve layer : resolveItem.members(null)){
-                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, layer.getTitle()));
+                        if(serviceName.equalsIgnoreCase("wms")){
+                            if( resolveItem.canResolve(WebMapServer.class)){
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                            }
+                        }
+                        else if(serviceName.equalsIgnoreCase("wfs")){
+                            if(resolveItem.canResolve(WFSDataStore.class)){
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                            }
+                        }
+                        else if(serviceName.equalsIgnoreCase("wps")){
+                            if(resolveItem.canResolve(WebProcessingService.class)){
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
                             }
                         }
                             
                     }
                     
+                    /**
+                     * ServiceType: Database
+                     * Service: Oracle, MySQL, PostGIS, H2, ...
+                     * Operation: Show database names
+                     */
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
-                        if( resolveItem.canResolve(PostgisDataStore.class) )
-                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
-                            //serviceText.add("PostGIS: "+resolveItem.getTitle());
-                        else if( resolveItem.canResolve(MysqlDataSource.class) )
-                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
-                            //serviceText.add("MySQL: "+resolveItem.getTitle());
-                        else if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
-                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
-                            //serviceText.add("DB2: "+resolveItem.getTitle());
-                        else if(resolveItem.canResolve(H2DataStoreFactory.class))
-                            dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
-                            //serviceText.add("H2: "+resolveItem.getTitle());
+                        if(serviceName.equalsIgnoreCase("postgis")){
+                            if( resolveItem.canResolve(PostgisDataStore.class) )
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                        }
+                        else if(serviceName.equalsIgnoreCase("mysql")){
+                            if( resolveItem.canResolve(MysqlDataSource.class) )
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                        }
+                        else if(serviceName.equalsIgnoreCase("db2")){
+                            if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                        }
+                        else if(serviceName.equalsIgnoreCase("h2")){
+                            if(resolveItem.canResolve(H2DataStoreFactory.class))
+                                dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
+                        }
                     }
                     
                     else if(serviceTypeValue.equalsIgnoreCase("uncategorized")){
