@@ -16,6 +16,11 @@ package eu.udig.catalog.ng.ui;
 
 
 
+import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.IResolve;
+import net.refractions.udig.catalog.IResolveChangeEvent;
+import net.refractions.udig.catalog.IResolveChangeListener;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.events.FocusEvent;
@@ -77,27 +82,24 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
 
 
     @Override
+    /**
+     * create tree components and handle selection provider on focus
+     */
     public void createPartControl( Composite parent ) {
         // TODO Auto-generated method stub
         treeViewerServiceType = new CatalogNGTreeView(parent, SERVICE_TYPE_ID);
         treeFilterServiceType = new CatalogNGTreeFilter();
         treeViewerServiceType.setInput(treeFilterServiceType.getInputTree(SERVICE_TYPE_ID,null,null));
-        treeViewerServiceType.getControl().addFocusListener(new FocusListener(){
-            
+        treeViewerServiceType.getControl().addFocusListener(new FocusListener(){          
             @Override
             public void focusLost( FocusEvent e ) {
                 // TODO Auto-generated method stub
-                
-                
             }
             
             @Override
             public void focusGained( FocusEvent e ) {
                 // TODO Auto-generated method stub
-                System.out.println("focus from servicetype");
-                //getSite().setSelectionProvider(treeViewerServiceType);
                 selectionProviderWrapper.setSelectionProvider(treeViewerServiceType);
-                
             }
         });
 
@@ -106,28 +108,22 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         treeFilterService = new CatalogNGTreeFilter();
         treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,null,null));
         treeViewerService.getControl().addFocusListener(new FocusListener(){
-            
             @Override
             public void focusLost( FocusEvent e ) {
                 // TODO Auto-generated method stub
-                
             }
             
             @Override
             public void focusGained( FocusEvent e ) {
                 // TODO Auto-generated method stub
-                System.out.println("focus from service");
-                //getSite().setSelectionProvider(treeViewerService);
                 selectionProviderWrapper.setSelectionProvider(treeViewerService);
-                
             }
         });
         
         treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
         treeFilterDataType = new CatalogNGTreeFilter();
         treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID, null, null));
-        treeViewerDataType.getControl().addFocusListener(new FocusListener(){
-            
+        treeViewerDataType.getControl().addFocusListener(new FocusListener(){          
             @Override
             public void focusLost( FocusEvent e ) {
                 // TODO Auto-generated method stub
@@ -137,25 +133,19 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             @Override
             public void focusGained( FocusEvent e ) {
                 // TODO Auto-generated method stub
-                System.out.println("focus from datatype");
                 //getSite().setSelectionProvider(treeViewerDataType);
-                
             }
         });
         
+        //catalog sync listener
+        CatalogPlugin.addListener(catalogSyncListener);
         
-        //cannot have 2 selection providers withing a viewpart. Need to implement custom selectionproviders @see
-        //getSite().setSelectionProvider(treeViewerServiceType);
-        //getSite().setSelectionProvider(treeViewerService);
+        //cannot have 2 selection providers within a viewpart. Calling custom Selection Provider for view
         getSite().setSelectionProvider(selectionProviderWrapper);        
+        
+        //Handle different components at selection listener
         getViewSite().getPage().addSelectionListener(this);
-        
-        
-        /*
-        treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
-        treeFilterDataType = new CatalogNGTreeFilter();
-        treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID,null,null));
-        */
+
         FillLayout layout = new FillLayout();
         parent.setLayout(layout);
         
@@ -182,5 +172,19 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             }
         }
     }
+    
+    /**
+     * Listener to listen to catalog change events and update view components(s)
+     */
+    IResolveChangeListener catalogSyncListener = new IResolveChangeListener(){
+        
+        @Override
+        public void changed( IResolveChangeEvent event ) {
+            // TODO Auto-generated method stub
+            System.out.println("catalog change "+event.getType());
+            IResolve resolve = event.getResolve();
+            
+        }
+    };
 
 }
