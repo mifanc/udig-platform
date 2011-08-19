@@ -27,6 +27,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
+import eu.udig.catalog.ng.internal.ServiceElement;
 import eu.udig.catalog.ng.internal.ServiceTypeElement;
 import eu.udig.catalog.ng.ui.internal.SelectionProviderWrapper;
 
@@ -59,8 +60,10 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
     private CatalogNGTreeView treeViewerServiceType,treeViewerService,treeViewerDataType;
     private CatalogNGTreeFilter treeFilterServiceType,treeFilterService,treeFilterDataType;
     
-    String selectionValue = "";
+    private String selectionValue = ""; //hold selection for service type
+    private String persSelectionValue = ""; //hold selection for service
     
+    //Custom selection provider class to handle multiple providers within a viewpart
     private SelectionProviderWrapper selectionProviderWrapper = new SelectionProviderWrapper();
     
 
@@ -171,18 +174,13 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
                 System.out.println("SELECTION: "+selectionValue);
                 treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,selectionValue,null));
             }
-            //Create tree  based on selection
-            //treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selected));
             
+            else if ( selected instanceof ServiceElement){
+                selectionValue = ((ServiceElement)selected).getServiceName();
+                persSelectionValue = ((ServiceElement)selected).getServiceTypeName();
+                treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID,selectionValue,persSelectionValue));
+            }
         }
-        
     }
-
-
-
-    
-    
-
-
 
 }
