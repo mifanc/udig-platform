@@ -101,7 +101,7 @@ public class DataTypeView extends ViewPart implements ISelectionListener {
             if ( selected instanceof ServiceElement){
                 selectionValue = ((ServiceElement)selected).getServiceName();
                 persSelectionValue = ((ServiceElement)selected).getServiceTypeName();
-                treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selectionValue,persSelectionValue));
+                //treeViewer.setInput(treeFilter.getInputTree(TYPE_ID,selectionValue,persSelectionValue));
             }
         }
 

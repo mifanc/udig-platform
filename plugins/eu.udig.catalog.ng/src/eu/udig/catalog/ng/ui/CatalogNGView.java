@@ -32,26 +32,25 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
+import eu.udig.catalog.ng.internal.DataTypeElement;
 import eu.udig.catalog.ng.internal.ServiceElement;
 import eu.udig.catalog.ng.internal.ServiceTypeElement;
 import eu.udig.catalog.ng.ui.internal.SelectionProviderWrapper;
 
 /**
- * View for Service Type - the first level in the catalog browse view. 
+ * View for CatalogNG browse, a Java Browsing Perspective like browsing view for catalog, without the Perspective part 
  * <p>
- * The catalog browse, aka CatalongNG view will consist of the following views
+ * The catalog browse, aka CatalongNG view will consist of the following view components.
  * <ul>
  * <li>Service Type</li>
  * <li>Service</li>
  * <li>Data Type | Feature Type</li>
  * <li>Layers</li>
  * </ul>
+ * Components to listen to each other in a given order for changes
  * </p>
  * @author  Mifan Careem     mifanc@gmail.com
  * @since   1.2.0
- * @todo    Implement IAdaptable
- * @todo    ISelectionListener
- * @todo    Currently borrows from CatalogView - change to be unique
  */
 public class CatalogNGView extends CatalogNGViewPart implements ISelectionListener {
     
@@ -61,12 +60,14 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
     public final String SERVICE_TYPE_ID = "ServiceTypeView"; //$NON-NLS-1$
     public final String SERVICE_ID = "ServiceView"; //$NON-NLS-1$
     public final String DATA_TYPE_ID = "DataTypeView"; //$NON-NLS-1$
+    public final String LAYER_ID = "LayerView"; //$NON-NLS-1$
     
-    private CatalogNGTreeView treeViewerServiceType,treeViewerService,treeViewerDataType;
-    private CatalogNGTreeFilter treeFilterServiceType,treeFilterService,treeFilterDataType;
+    private CatalogNGTreeView treeViewerServiceType,treeViewerService,treeViewerDataType,treeViewerLayers;
+    private CatalogNGTreeFilter treeFilterServiceType,treeFilterService,treeFilterDataType,treeFilterLayers;
     
     private String selectionValue = ""; //hold selection for service type
     private String persSelectionValue = ""; //hold selection for service
+    private String dataTypeSelectionValue = ""; //hold selection for data type
     
     //Custom selection provider class to handle multiple providers within a viewpart
     private SelectionProviderWrapper selectionProviderWrapper = new SelectionProviderWrapper();
@@ -89,7 +90,7 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         // TODO Auto-generated method stub
         treeViewerServiceType = new CatalogNGTreeView(parent, SERVICE_TYPE_ID);
         treeFilterServiceType = new CatalogNGTreeFilter();
-        treeViewerServiceType.setInput(treeFilterServiceType.getInputTree(SERVICE_TYPE_ID,null,null));
+        treeViewerServiceType.setInput(treeFilterServiceType.getInputTree(SERVICE_TYPE_ID,null,null, null));
         treeViewerServiceType.getControl().addFocusListener(new FocusListener(){          
             @Override
             public void focusLost( FocusEvent e ) {
@@ -106,7 +107,7 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
 
         treeViewerService = new CatalogNGTreeView(parent, SERVICE_ID);
         treeFilterService = new CatalogNGTreeFilter();
-        treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,null,null));
+        treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,null,null, null));
         treeViewerService.getControl().addFocusListener(new FocusListener(){
             @Override
             public void focusLost( FocusEvent e ) {
@@ -122,7 +123,7 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         
         treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
         treeFilterDataType = new CatalogNGTreeFilter();
-        treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID, null, null));
+        treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID, null, null, null));
         treeViewerDataType.getControl().addFocusListener(new FocusListener(){          
             @Override
             public void focusLost( FocusEvent e ) {
@@ -133,9 +134,13 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             @Override
             public void focusGained( FocusEvent e ) {
                 // TODO Auto-generated method stub
-                //getSite().setSelectionProvider(treeViewerDataType);
+                selectionProviderWrapper.setSelectionProvider(treeViewerDataType);
             }
         });
+        
+        treeViewerLayers = new CatalogNGTreeView(parent, LAYER_ID);
+        treeFilterLayers = new CatalogNGTreeFilter();
+        treeViewerLayers.setInput(treeFilterLayers.getInputTree(LAYER_ID, null, null, null));
         
         //catalog sync listener
         CatalogPlugin.addListener(catalogSyncListener);
@@ -162,13 +167,22 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             if ( selected instanceof ServiceTypeElement){
                 selectionValue = ((ServiceTypeElement)selected).getServiceTypeName();
                 System.out.println("SELECTION: "+selectionValue);
-                treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,selectionValue,null));
+                treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,selectionValue,null,null));
             }
             
             else if ( selected instanceof ServiceElement){
                 selectionValue = ((ServiceElement)selected).getServiceName();
                 persSelectionValue = ((ServiceElement)selected).getServiceTypeName();
-                treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID,selectionValue,persSelectionValue));
+                System.out.println("SELECTION SERVICE: "+selectionValue+"-"+persSelectionValue);
+                treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID,selectionValue,persSelectionValue,null));
+            }
+            
+            else if ( selected instanceof DataTypeElement){
+                selectionValue = ((DataTypeElement)selected).getServiceName();
+                persSelectionValue = ((DataTypeElement)selected).getServiceTypeName();
+                dataTypeSelectionValue = ((DataTypeElement)selected).getDataTypeName();
+                System.out.println("SELECTION DATA: "+selectionValue+"-"+persSelectionValue+"-"+dataTypeSelectionValue);
+                treeViewerLayers.setInput(treeFilterLayers.getInputTree(LAYER_ID,selectionValue,persSelectionValue,dataTypeSelectionValue));
             }
         }
     }
