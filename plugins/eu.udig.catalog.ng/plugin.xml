@@ -43,6 +43,14 @@
             name="Layers"
             restorable="true">
       </view>
+      <view
+            category="catalogng"
+            class="eu.udig.catalog.ng.ui.CatalogNGView"
+            icon="icons/etool16/workbench.png"
+            id="eu.udig.catalog.ng.ui.CatalogNGView"
+            name="CatalogNGView"
+            restorable="true">
+      </view>
    </extension>
 
 </plugin>
