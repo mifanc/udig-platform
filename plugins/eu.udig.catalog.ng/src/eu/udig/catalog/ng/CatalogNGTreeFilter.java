@@ -52,6 +52,7 @@ import net.refractions.udig.catalog.IRepository;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.ISearch;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.catalog.PostgisService2;
 import net.refractions.udig.catalog.internal.CatalogImpl;
 import net.refractions.udig.catalog.memory.MemoryCatalog;
 
@@ -88,7 +89,7 @@ public class CatalogNGTreeFilter {
     public Set<DataTypeElement> dataTypeElementSet;
     public List<String> layers; //convert to IResolve
     
-    private boolean DEBUG = false;
+    private boolean DEBUG = true;
     
     MemoryCatalog localCatalog;
     
@@ -163,7 +164,8 @@ public class CatalogNGTreeFilter {
             try {
                 for( IResolve resolveItem : searchCatalog.members(null)){
                     //using {else-if} instead of {if}. A resource can be categorized under many categories?
-                    //System.out.println("service "+resolveItem.getTitle());
+                    if(DEBUG)
+                        System.out.println("service "+resolveItem.getTitle());
                     
 
                     if( resolveItem.canResolve(ShapefileDataStore.class)        ||
@@ -183,6 +185,7 @@ public class CatalogNGTreeFilter {
                              resolveItem.canResolve(PostgisFeatureStore.class)        ||
                              resolveItem.canResolve(PostgisDataStoreFactory.class)    ||
                              resolveItem.canResolve(MySQLConnection.class)            ||
+                             resolveItem instanceof PostgisService2                   ||
                              resolveItem.canResolve(H2DataStoreFactory.class)         ||
                              resolveItem.canResolve(OracleNGDataStoreFactory.class)   ||
                              resolveItem.canResolve(DB2NGDataStoreFactory.class)      ||
@@ -263,7 +266,9 @@ public class CatalogNGTreeFilter {
                      * Operation:   Show database groupings (Oracle, PostGIS, MySQL etc.)
                      */
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
-                        if( resolveItem.canResolve(PostgisDataStore.class) )
+                        if( resolveItem.canResolve(PostgisDataStore.class)      ||
+                            resolveItem instanceof PostgisService2                    
+                        )
                             serviceElementSet.add(new ServiceElement(serviceTypeValue, "PostGIS"));
                         else if( resolveItem.canResolve(MysqlDataSource.class) )
                             serviceElementSet.add(new ServiceElement(serviceTypeValue, "MySQL"));
@@ -372,7 +377,9 @@ public class CatalogNGTreeFilter {
                      */
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
                         if(serviceName.equalsIgnoreCase("postgis")){
-                            if( resolveItem.canResolve(PostgisDataStore.class) )
+                            if( resolveItem.canResolve(PostgisDataStore.class)      ||
+                                resolveItem instanceof PostgisService2    
+                            )
                                 dataTypeElementSet.add(new DataTypeElement(serviceTypeValue, serviceName, resolveItem.getTitle()));
                         }
                         else if(serviceName.equalsIgnoreCase("mysql")){
@@ -468,8 +475,13 @@ public class CatalogNGTreeFilter {
                     }
                     
                     else if(serviceTypeValue.equalsIgnoreCase("database")){
-                        if( resolveItem.canResolve(PostgisDataStore.class) )
-                            layers.add(resolveItem.getTitle());
+                        if( resolveItem.canResolve(PostgisDataStore.class)      ||
+                            resolveItem instanceof PostgisService2    
+                          )
+                            for (IResolve table : resolveItem.members(null)){
+                                layers.add(table.getTitle());
+                            }
+                            
                             //serviceText.add("PostGIS: "+resolveItem.getTitle());
                         else if( resolveItem.canResolve(MysqlDataSource.class) )
                             layers.add(resolveItem.getTitle());
