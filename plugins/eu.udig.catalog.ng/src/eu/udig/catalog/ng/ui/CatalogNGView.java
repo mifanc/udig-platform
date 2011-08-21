@@ -23,6 +23,8 @@ import net.refractions.udig.catalog.IResolveChangeListener;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -69,6 +71,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
     private String persSelectionValue = ""; //hold selection for service
     private String dataTypeSelectionValue = ""; //hold selection for data type
     
+    private SashForm splitter;
+    
     //Custom selection provider class to handle multiple providers within a viewpart
     private SelectionProviderWrapper selectionProviderWrapper = new SelectionProviderWrapper();
     
@@ -88,7 +92,10 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
      */
     public void createPartControl( Composite parent ) {
         // TODO Auto-generated method stub
-        treeViewerServiceType = new CatalogNGTreeView(parent, SERVICE_TYPE_ID);
+        splitter = new SashForm(parent, SWT.HORIZONTAL);
+        
+        //treeViewerServiceType = new CatalogNGTreeView(parent, SERVICE_TYPE_ID);
+        treeViewerServiceType = new CatalogNGTreeView(splitter, SERVICE_TYPE_ID);
         treeFilterServiceType = new CatalogNGTreeFilter();
         treeViewerServiceType.setInput(treeFilterServiceType.getInputTree(SERVICE_TYPE_ID,null,null, null));
         treeViewerServiceType.getControl().addFocusListener(new FocusListener(){          
@@ -105,7 +112,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         });
 
 
-        treeViewerService = new CatalogNGTreeView(parent, SERVICE_ID);
+        //treeViewerService = new CatalogNGTreeView(parent, SERVICE_ID);
+        treeViewerService = new CatalogNGTreeView(splitter, SERVICE_ID);
         treeFilterService = new CatalogNGTreeFilter();
         treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,null,null, null));
         treeViewerService.getControl().addFocusListener(new FocusListener(){
@@ -121,7 +129,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             }
         });
         
-        treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
+        //treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
+        treeViewerDataType = new CatalogNGTreeView(splitter, DATA_TYPE_ID);
         treeFilterDataType = new CatalogNGTreeFilter();
         treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID, null, null, null));
         treeViewerDataType.getControl().addFocusListener(new FocusListener(){          
@@ -138,7 +147,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             }
         });
         
-        treeViewerLayers = new CatalogNGTreeView(parent, LAYER_ID);
+        //treeViewerLayers = new CatalogNGTreeView(parent, LAYER_ID);
+        treeViewerLayers = new CatalogNGTreeView(splitter, LAYER_ID);
         treeFilterLayers = new CatalogNGTreeFilter();
         treeViewerLayers.setInput(treeFilterLayers.getInputTree(LAYER_ID, null, null, null));
         
@@ -152,7 +162,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         getViewSite().getPage().addSelectionListener(this);
 
         FillLayout layout = new FillLayout();
-        parent.setLayout(layout);
+        //parent.setLayout(layout);
+        splitter.setLayout(layout);
         
         super.createPartControl(parent);
     }
