@@ -16,6 +16,7 @@ package eu.udig.catalog.ng.ui;
 
 
 
+
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IResolveChangeEvent;
@@ -23,15 +24,18 @@ import net.refractions.udig.catalog.IResolveChangeListener;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.swt.widgets.Label;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
 import eu.udig.catalog.ng.internal.DataTypeElement;
@@ -66,12 +70,21 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
     
     private CatalogNGTreeView treeViewerServiceType,treeViewerService,treeViewerDataType,treeViewerLayers;
     private CatalogNGTreeFilter treeFilterServiceType,treeFilterService,treeFilterDataType,treeFilterLayers;
+    private Composite serviceTypeComposite, serviceComposite, dataTypeComposite, layerComposite;
+    private GridLayout stGrid, sGrid, dtGrid, lGrid;
+    
+    private String serviceTypeTxt = "Service Type";
+    private String serviceTxt = "Service Groups";
+    private String dataTypeTxt = "Services";
+    private String layerTxt = "Layers";
     
     private String selectionValue = ""; //hold selection for service type
     private String persSelectionValue = ""; //hold selection for service
     private String dataTypeSelectionValue = ""; //hold selection for data type
     
     private SashForm splitter;
+    private GridData gridData;
+    
     
     //Custom selection provider class to handle multiple providers within a viewpart
     private SelectionProviderWrapper selectionProviderWrapper = new SelectionProviderWrapper();
@@ -94,10 +107,20 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         // TODO Auto-generated method stub
         splitter = new SashForm(parent, SWT.HORIZONTAL);
         
-        //treeViewerServiceType = new CatalogNGTreeView(parent, SERVICE_TYPE_ID);
-        treeViewerServiceType = new CatalogNGTreeView(splitter, SERVICE_TYPE_ID);
+       
+        
+        serviceTypeComposite = new Composite(splitter, SWT.SINGLE);
+        stGrid = new GridLayout(1, false);
+        stGrid.marginHeight = 0;
+        stGrid.marginWidth = 0;
+        serviceTypeComposite.setLayout(stGrid);
+        Label stLabel = new Label(serviceTypeComposite, SWT.BOLD | SWT.CENTER);
+        stLabel.setText(serviceTypeTxt);
+
+        treeViewerServiceType = new CatalogNGTreeView(serviceTypeComposite, SERVICE_TYPE_ID);
         treeFilterServiceType = new CatalogNGTreeFilter();
         treeViewerServiceType.setInput(treeFilterServiceType.getInputTree(SERVICE_TYPE_ID,null,null, null));
+        treeViewerServiceType.getTree().setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
         treeViewerServiceType.getControl().addFocusListener(new FocusListener(){          
             @Override
             public void focusLost( FocusEvent e ) {
@@ -111,11 +134,18 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             }
         });
 
+        serviceComposite = new Composite(splitter, SWT.SINGLE);
+        sGrid = new GridLayout(1, false);
+        sGrid.marginHeight = 0;
+        sGrid.marginWidth = 0;
+        serviceComposite.setLayout(sGrid);
+        Label sLabel = new Label(serviceComposite, SWT.BOLD | SWT.CENTER);
+        sLabel.setText(serviceTxt);
 
-        //treeViewerService = new CatalogNGTreeView(parent, SERVICE_ID);
-        treeViewerService = new CatalogNGTreeView(splitter, SERVICE_ID);
+        treeViewerService = new CatalogNGTreeView(serviceComposite, SERVICE_ID);
         treeFilterService = new CatalogNGTreeFilter();
         treeViewerService.setInput(treeFilterService.getInputTree(SERVICE_ID,null,null, null));
+        treeViewerService.getTree().setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
         treeViewerService.getControl().addFocusListener(new FocusListener(){
             @Override
             public void focusLost( FocusEvent e ) {
@@ -129,10 +159,17 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             }
         });
         
-        //treeViewerDataType = new CatalogNGTreeView(parent, DATA_TYPE_ID);
-        treeViewerDataType = new CatalogNGTreeView(splitter, DATA_TYPE_ID);
+        dataTypeComposite = new Composite(splitter, SWT.SINGLE);
+        dtGrid = new GridLayout(1, false);
+        dtGrid.marginHeight = 0;
+        dtGrid.marginWidth = 0;
+        dataTypeComposite.setLayout(dtGrid);
+        Label dtLabel = new Label(dataTypeComposite, SWT.BOLD | SWT.CENTER);
+        dtLabel.setText(dataTypeTxt);
+        treeViewerDataType = new CatalogNGTreeView(dataTypeComposite, DATA_TYPE_ID);
         treeFilterDataType = new CatalogNGTreeFilter();
         treeViewerDataType.setInput(treeFilterDataType.getInputTree(DATA_TYPE_ID, null, null, null));
+        treeViewerDataType.getTree().setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
         treeViewerDataType.getControl().addFocusListener(new FocusListener(){          
             @Override
             public void focusLost( FocusEvent e ) {
@@ -147,10 +184,19 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
             }
         });
         
-        //treeViewerLayers = new CatalogNGTreeView(parent, LAYER_ID);
-        treeViewerLayers = new CatalogNGTreeView(splitter, LAYER_ID);
+        layerComposite = new Composite(splitter, SWT.SINGLE);
+        lGrid = new GridLayout(1, false);
+        lGrid.marginHeight = 0;
+        lGrid.marginWidth = 0;
+        layerComposite.setLayout(lGrid);
+        Label lLabel = new Label(layerComposite, SWT.BOLD | SWT.CENTER);
+        lLabel.setText(layerTxt);
+        treeViewerLayers = new CatalogNGTreeView(layerComposite, LAYER_ID);
         treeFilterLayers = new CatalogNGTreeFilter();
         treeViewerLayers.setInput(treeFilterLayers.getInputTree(LAYER_ID, null, null, null));
+        treeViewerLayers.getTree().setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
+        
+        
         
         //catalog sync listener
         CatalogPlugin.addListener(catalogSyncListener);
