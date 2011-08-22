@@ -3,46 +3,10 @@
 <plugin>
    <extension
          point="org.eclipse.ui.views">
-      <view
-            allowMultiple="false"
-            category="catalogng"
-            class="eu.udig.catalog.ng.ui.ServiceTypeView"
-            icon="icons/etool16/workbench.png"
-            id="eu.udig.catalog.ng.ui.ServiceTypeView"
-            name="Service Types"
-            restorable="true">
-      </view>
       <category
             id="catalogng"
             name="CatalogNG">
       </category>
-      <view
-            allowMultiple="false"
-            category="catalogng"
-            class="eu.udig.catalog.ng.ui.ServiceView"
-            icon="icons/etool16/workbench.png"
-            id="eu.udig.catalog.ng.ui.ServiceView"
-            name="Services"
-            restorable="true">
-      </view>
-      <view
-            allowMultiple="false"
-            category="catalogng"
-            class="eu.udig.catalog.ng.ui.DataTypeView"
-            icon="icons/etool16/workbench.png"
-            id="eu.udig.catalog.ng.ui.DataTypeView"
-            name="Data Types"
-            restorable="true">
-      </view>
-      <view
-            allowMultiple="false"
-            category="catalogng"
-            class="eu.udig.catalog.ng.ui.LayerView"
-            icon="icons/etool16/workbench.png"
-            id="eu.udig.catalog.ng.ui.LayerView"
-            name="Layers"
-            restorable="true">
-      </view>
       <view
             category="catalogng"
             class="eu.udig.catalog.ng.ui.CatalogNGView"
