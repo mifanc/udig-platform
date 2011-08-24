@@ -21,9 +21,6 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IResolveChangeEvent;
 import net.refractions.udig.catalog.IResolveChangeListener;
-import net.refractions.udig.catalog.internal.ui.ImageConstants;
-import net.refractions.udig.catalog.ui.CatalogUIPlugin;
-import net.refractions.udig.internal.ui.UiPlugin;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -34,7 +31,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
@@ -47,13 +43,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.swt.widgets.Label;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
 import eu.udig.catalog.ng.internal.DataTypeElement;
@@ -105,6 +101,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
     
     private Action copyAction;
     private Clipboard clipBoard;
+    
+    private Display display;
     
     
     //Custom selection provider class to handle multiple providers within a viewpart
@@ -232,25 +230,28 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         //parent.setLayout(layout);
         splitter.setLayout(layout);
         
-        createContextMenu();
+        createContextMenu(parent);
+        
         
         super.createPartControl(parent);
     }
     
     /**
-     * 
+     * Menu item to add Copy to Clipboard capability
+     * This allows for copying the layer name in the layer viewer to the clipboard
+     * e.g: Copy the path of the filename
+     * @param   parentWidget  Composite parent for display
      */
-    private void createContextMenu(){
+    private void createContextMenu(Composite parentWidget){
         final MenuManager contextMenu = new MenuManager();
-        copyAction = new Action("Copy to clipboard"){
+        display = parentWidget.getDisplay();
+        copyAction = new Action("Copy to Clipboard"){ //$NON-NLS-1$
             public void run() {
-                //IStructuredSelection sel = (IStructuredSelection) viewer.getSelection();
               IStructuredSelection sel = (IStructuredSelection) treeViewerLayers.getSelection();
                 sel.getFirstElement();
                 String textData = (String)sel.getFirstElement();
                 TextTransfer textTransfer = TextTransfer.getInstance();
-                //Set a display here - MM
-                //clipBoard = new Clipboard();
+                clipBoard = new Clipboard(display);
                 clipBoard.setContents(new Object[]{textData}, new Transfer[]{textTransfer});
             }
         };
