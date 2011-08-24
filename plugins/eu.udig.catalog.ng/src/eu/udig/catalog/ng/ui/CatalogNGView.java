@@ -21,20 +21,38 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IResolveChangeEvent;
 import net.refractions.udig.catalog.IResolveChangeListener;
+import net.refractions.udig.catalog.internal.ui.ImageConstants;
+import net.refractions.udig.catalog.ui.CatalogUIPlugin;
+import net.refractions.udig.internal.ui.UiPlugin;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.swt.widgets.Label;
 
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
@@ -84,6 +102,9 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
     
     private SashForm splitter;
     private GridData gridData;
+    
+    private Action copyAction;
+    private Clipboard clipBoard;
     
     
     //Custom selection provider class to handle multiple providers within a viewpart
@@ -211,7 +232,53 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         //parent.setLayout(layout);
         splitter.setLayout(layout);
         
+        createContextMenu();
+        
         super.createPartControl(parent);
+    }
+    
+    /**
+     * 
+     */
+    private void createContextMenu(){
+        final MenuManager contextMenu = new MenuManager();
+        copyAction = new Action("Copy to clipboard"){
+            public void run() {
+                //IStructuredSelection sel = (IStructuredSelection) viewer.getSelection();
+              IStructuredSelection sel = (IStructuredSelection) treeViewerLayers.getSelection();
+                sel.getFirstElement();
+                String textData = (String)sel.getFirstElement();
+                TextTransfer textTransfer = TextTransfer.getInstance();
+                //Set a display here - MM
+                //clipBoard = new Clipboard();
+                clipBoard.setContents(new Object[]{textData}, new Transfer[]{textTransfer});
+            }
+        };
+        contextMenu.setRemoveAllWhenShown(true);
+        contextMenu.addMenuListener(new IMenuListener(){
+
+            public void menuAboutToShow( IMenuManager mgr ) {
+                contextMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
+                contextMenu.add(new Separator());
+                contextMenu.add(copyAction);
+
+                // contextMenu.add(refreshAction);
+                IWorkbenchWindow window = getSite().getWorkbenchWindow();
+                IAction action = ActionFactory.IMPORT.create(window);
+
+            }
+
+        });
+
+        // Create menu.
+        Menu menu = contextMenu.createContextMenu(treeViewerLayers.getControl());
+        treeViewerLayers.getControl().setMenu(menu);
+
+        // Register menu for extension.
+        getSite().registerContextMenu(contextMenu, treeViewerLayers);
+
+        
+        
     }
 
 
