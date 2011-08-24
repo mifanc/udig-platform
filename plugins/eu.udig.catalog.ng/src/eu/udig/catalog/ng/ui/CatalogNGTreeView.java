@@ -92,7 +92,7 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
      */
     public CatalogNGTreeView( Composite parent, String type ) {
         //this(parent, true);
-        this(parent,true,type);
+        this(parent,false,type);
                                                                                 
     }
     
@@ -118,7 +118,7 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         
         setContentProvider(new ResolveContentProvider());
         
-        /*
+
         ResolveLabelProviderSimple resolveLabelProviderSimple = new ResolveLabelProviderSimple();
         if (titles) {
             setLabelProvider(new DecoratingLabelProvider(resolveLabelProviderSimple,
@@ -126,8 +126,9 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         } else {
             setLabelProvider(resolveLabelProviderSimple);
         }
-        */
-        //setContentProvider(getContentProvider());
+
+        setContentProvider(getContentProvider());
+        
         setLabelProvider(getLabelProvider());
         setUseHashlookup(true);
         

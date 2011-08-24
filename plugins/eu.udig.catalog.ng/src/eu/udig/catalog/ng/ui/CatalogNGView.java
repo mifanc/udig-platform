@@ -230,6 +230,8 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
         //parent.setLayout(layout);
         splitter.setLayout(layout);
         
+        createMenu();
+        
         createContextMenu(parent);
         
         
@@ -280,6 +282,15 @@ public class CatalogNGView extends CatalogNGViewPart implements ISelectionListen
 
         
         
+    }
+    
+    /**
+     * Create menu with refresh option.
+     */
+    private void createMenu() {
+        IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
+        //mgr.add(saveAction);
+        //mgr.add(loadAction);
     }
 
 

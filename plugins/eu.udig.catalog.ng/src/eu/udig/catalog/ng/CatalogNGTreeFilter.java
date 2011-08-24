@@ -62,7 +62,8 @@ import eu.udig.catalog.ng.internal.ServiceTypeElement;
 import eu.udig.catalog.ng.ui.internal.Messages;
 
 /**
- * TODO Purpose of 
+ * Provides a filtered List of required elements to the TreeView. The list changes
+ * based on selections of the previous viewers 
  * <p>
  * <ul>
  * <li></li>
@@ -88,6 +89,7 @@ public class CatalogNGTreeFilter {
     public Set<ServiceElement> serviceElementSet;
     public Set<DataTypeElement> dataTypeElementSet;
     public List<String> layers; //convert to IResolve
+    private List<IResolve> layersR;
     
     private boolean DEBUG = true;
     
@@ -142,7 +144,8 @@ public class CatalogNGTreeFilter {
             return buildDataTypeList(selection, persSelection);
         }
         else if(viewType.equalsIgnoreCase("layerview")){
-            return buildLayerList(selection, persSelection, dataType);
+            //return buildLayerList(selection, persSelection, dataType);
+            return buildLayerListofResolves(selection, persSelection, dataType);
         }
         return new Object();
     }
@@ -513,6 +516,121 @@ public class CatalogNGTreeFilter {
         return layers;
     }
     
+    /**
+     * Iterate through a set of IResolves and build a layer list 
+     *  of string values for the tree viewer
+     *  under construction
+     *  @todo   Display actual IResolves
+     *  @todo   Use service type, service, data type as params - accept null values
+     *  @todo   Standardize names from Messages
+     *  @todo   Get total list of classes from geotools
+     *  @todo   Fix issues with l10n NLS message missing - ignoring currently
+     * @return List ArrayList of String values for ServiceTypes
+     */
+    public List<IResolve> buildLayerListofResolves(Object selectedServiceName, Object currentServiceTypeName, Object selectedDataType){
+        //handle first time null
+        if(selectedDataType == null)
+            return new ArrayList<IResolve>();
+              
+        //Usage of Set ensures non-duplication of Service Type values
+        layersR = new ArrayList<IResolve>();
+        String serviceTypeValue = (String)currentServiceTypeName;
+        String serviceName = (String)selectedServiceName;
+        String dataTypeName = (String)selectedDataType;
+        File thisFile,parentFile;
+        for( ISearch searchCatalog : CatalogPlugin.getDefault().getCatalogs()){
+            try {
+                for( IResolve resolveItem : searchCatalog.members(null)){
+                    //using {else-if} instead of {if}. A resource can be categorized under many categories?
+                    if(serviceTypeValue.equalsIgnoreCase("file")){
+                        //adhoc grouped directories here as per proposal   
+                        //@todo only handling shp here. get all other local file types
+                        if( resolveItem.canResolve(ShapefileDataStore.class) ||
+                            resolveItem.canResolve(GeoTiffFormat.class)
+                        ){
+                            //Quick hack to store directory. Get better way to do this
+                                thisFile = new File(resolveItem.getTitle());
+                                parentFile = thisFile.getParentFile();
+                                if(parentFile.isDirectory() && parentFile.getName().equalsIgnoreCase(serviceName)){
+                                    if(dataTypeName.equalsIgnoreCase("shapefile")){
+                                        if(resolveItem.canResolve(ShapefileDataStore.class))
+                                            layersR.add(resolveItem);
+                                    }
+
+                                }
+                        }     
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("web")){
+
+                        if( resolveItem.canResolve(WebMapServer.class)  || 
+                            resolveItem.canResolve(WebProcessingService.class) ||
+                            resolveItem.canResolve(WFSDataStore.class)
+                        ){
+                        
+                            if( resolveItem.getTitle().equalsIgnoreCase(dataTypeName)){
+                                System.out.println("web server: "+resolveItem.getTitle());
+                                for (IResolve layer : resolveItem.members(null)){
+                                    layersR.add(resolveItem);
+                                    System.out.println("web layer: "+layer.getTitle());
+                                    System.out.println("web layerid: "+layer.getID());
+                                    for (IResolve l : layer.members(null)){
+                                        System.out.println("inner layer: "+l.getTitle());
+                                        System.out.println("inner layerid: "+l.getID());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("database")){
+                        if( resolveItem.canResolve(PostgisDataStore.class)      ||
+                            resolveItem instanceof PostgisService2    
+                          )
+                            if( resolveItem.getTitle().equalsIgnoreCase(dataTypeName)){
+                                System.out.println("db server: "+resolveItem.getTitle());
+                                for (IResolve layer : resolveItem.members(null)){
+                                    layersR.add(resolveItem);
+                                    System.out.println("db layer: "+layer.getTitle());
+                                    System.out.println("db layerid: "+layer.getID());
+                                    for (IResolve l : layer.members(null)){
+                                        System.out.println("inner layer: "+l.getTitle());
+                                        System.out.println("inner layerid: "+l.getID());
+                                    }
+                                }
+                            }
+                            
+                            
+                            //serviceText.add("PostGIS: "+resolveItem.getTitle());
+                        else if( resolveItem.canResolve(MysqlDataSource.class) )
+                            layersR.add(resolveItem);
+                            //serviceText.add("MySQL: "+resolveItem.getTitle());
+                        else if( resolveItem.canResolve(DB2NGDataStoreFactory.class) )
+                            layersR.add(resolveItem);
+                            //serviceText.add("DB2: "+resolveItem.getTitle());
+                        else if(resolveItem.canResolve(H2DataStoreFactory.class))
+                            layersR.add(resolveItem);
+                            //serviceText.add("H2: "+resolveItem.getTitle());
+                    }
+                    
+                    else if(serviceTypeValue.equalsIgnoreCase("uncategorized")){
+                        layersR.add(resolveItem);
+                        //serviceText.add(resolveItem.getTitle());
+                    }
+                    else{
+                        //Handle uncategorized
+                        //Handle All
+                        layersR.add(resolveItem);
+                        //serviceText.add(resolveItem.getTitle());
+                    }
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return layersR;
+    }
 
 
     
