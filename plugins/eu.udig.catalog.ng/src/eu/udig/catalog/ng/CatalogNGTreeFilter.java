@@ -76,6 +76,7 @@ import eu.udig.catalog.ng.ui.internal.Messages;
 public class CatalogNGTreeFilter {
     
     //Variable to hold new filteredlist that can be passed to the setinput of the Tree
+    
     public CatalogImpl filteredList;
     public Iterator itr;
     public IRepository catalog;
@@ -91,7 +92,7 @@ public class CatalogNGTreeFilter {
     public List<String> layers; //convert to IResolve
     private List<IResolve> layersR;
     
-    private boolean DEBUG = true;
+    private boolean DEBUG = false;
     
     MemoryCatalog localCatalog;
     
@@ -571,12 +572,17 @@ public class CatalogNGTreeFilter {
                             if( resolveItem.getTitle().equalsIgnoreCase(dataTypeName)){
                                 System.out.println("web server: "+resolveItem.getTitle());
                                 for (IResolve layer : resolveItem.members(null)){
-                                    layersR.add(resolveItem);
-                                    System.out.println("web layer: "+layer.getTitle());
-                                    System.out.println("web layerid: "+layer.getID());
+                                    //layersR.add(resolveItem);
+                                    if(DEBUG){
+                                        System.out.println("web layer: "+layer.getTitle());
+                                        System.out.println("web layerid: "+layer.getID());
+                                    }
                                     for (IResolve l : layer.members(null)){
-                                        System.out.println("inner layer: "+l.getTitle());
-                                        System.out.println("inner layerid: "+l.getID());
+                                        if(DEBUG){
+                                            System.out.println("inner layer: "+l.getTitle());
+                                            System.out.println("inner layerid: "+l.getID());
+                                        }
+                                        layersR.add(l);
                                     }
                                 }
                             }
@@ -590,12 +596,17 @@ public class CatalogNGTreeFilter {
                             if( resolveItem.getTitle().equalsIgnoreCase(dataTypeName)){
                                 System.out.println("db server: "+resolveItem.getTitle());
                                 for (IResolve layer : resolveItem.members(null)){
-                                    layersR.add(resolveItem);
-                                    System.out.println("db layer: "+layer.getTitle());
-                                    System.out.println("db layerid: "+layer.getID());
+                                    //layersR.add(resolveItem);
+                                    if(DEBUG){
+                                        System.out.println("db layer: "+layer.getTitle());
+                                        System.out.println("db layerid: "+layer.getID());
+                                    }
                                     for (IResolve l : layer.members(null)){
-                                        System.out.println("inner layer: "+l.getTitle());
-                                        System.out.println("inner layerid: "+l.getID());
+                                        if(DEBUG){
+                                            System.out.println("inner layer: "+l.getTitle());
+                                            System.out.println("inner layerid: "+l.getID());
+                                        }
+                                        layersR.add(l);
                                     }
                                 }
                             }

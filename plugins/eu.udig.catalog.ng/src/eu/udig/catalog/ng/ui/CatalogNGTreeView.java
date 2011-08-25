@@ -59,6 +59,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import eu.udig.catalog.ng.CatalogNGPlugin;
 import eu.udig.catalog.ng.CatalogNGTreeFilter;
+import eu.udig.catalog.ng.internal.NGResolveLabelProvider;
 
 /**
  * Provides Tree view of the Registry Service Types for a unified catalog NG view 
@@ -120,11 +121,13 @@ public class CatalogNGTreeView extends TreeViewer implements ISelectionChangedLi
         
 
         ResolveLabelProviderSimple resolveLabelProviderSimple = new ResolveLabelProviderSimple();
+        NGResolveLabelProvider ngResolveLabelProvider = new NGResolveLabelProvider();
         if (titles) {
             setLabelProvider(new DecoratingLabelProvider(resolveLabelProviderSimple,
                     new ResolveTitlesDecorator(resolveLabelProviderSimple)));
         } else {
-            setLabelProvider(resolveLabelProviderSimple);
+            //setLabelProvider(resolveLabelProviderSimple);
+            setLabelProvider(ngResolveLabelProvider);
         }
 
         setContentProvider(getContentProvider());
